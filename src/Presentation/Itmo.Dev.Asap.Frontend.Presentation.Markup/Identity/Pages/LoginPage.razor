@@ -1,0 +1,74 @@
+@page "/login"
+@layout EmptyLayout
+@attribute [AllowAnonymous]
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity.Models
+@inject NavigationManager NavigationManager
+@inject IIdentityService IdentityService
+@inject ICurrentUser CurrentUser
+
+<MudStack Class="justify-center" Row="true">
+
+    <MudForm Style="width: 100%; max-width: 500px;">
+
+        <MudFocusTrap Active="true">
+            <MudTextField Label="Username" @bind-Value="_username" Immediate="true"/>
+            <MudTextField Placeholder="Password" InputType="InputType.Password" @bind-Value="_password" Immediate="true"/>
+        </MudFocusTrap>
+
+        @if (_errorMessage is not null)
+        {
+            <MudText Typo="Typo.caption" Color="Color.Error">
+                @_errorMessage
+            </MudText>
+        }
+
+        <MudStack Justify="Justify.Center" Row="false">
+            <MudButton
+                Disabled="@(ButtonEnabled is false)"
+                Color="Color.Primary"
+                OnClick="@OnLoginButtonClickedAsync">
+                Login
+            </MudButton>
+        </MudStack>
+
+    </MudForm>
+
+</MudStack>
+
+@code {
+
+    private string? _username;
+    private string? _password;
+
+    private string? _errorMessage;
+
+    private bool ButtonEnabled => _username is not null && _password is not null;
+
+    protected override void OnParametersSet()
+    {
+        if (CurrentUser.IsAuthenticated)
+            NavigationManager.NavigateTo("/");
+    }
+
+    private async Task OnLoginButtonClickedAsync()
+    {
+        if (_username is null || _password is null)
+            return;
+
+        var result = await IdentityService.LoginAsync(_username, _password, default);
+
+        switch (result)
+        {
+            case LoginResult.Success:
+                _errorMessage = null;
+                NavigationManager.NavigateTo("/");
+                break;
+
+            case LoginResult.Failure failure:
+                _errorMessage = failure.Message;
+                break;
+        }
+    }
+
+}

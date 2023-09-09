@@ -1,0 +1,49 @@
+@namespace Itmo.Dev.Asap.Frontend.Presentation.Components
+@inherits EditableValueComponent<DateTime>
+
+@{
+    base.BuildRenderTree(__builder);
+}
+
+@code {
+
+    private bool _isValueValid = true;
+
+    private DateTime? EditingDate
+    {
+        get => EditingValue;
+        set
+        {
+            _isValueValid = value is not null;
+
+            if (value is null)
+                return;
+
+            EditingValue = value.Value;
+        }
+    }
+
+    [Parameter]
+    public override string ValueWidth { get; set; } = "115px";
+
+    protected override bool SubmitEnabled => _isValueValid;
+
+    protected override RenderFragment RenderValue(DateTime value)
+    {
+        return @<div>@value.ToString("d")</div>;
+    }
+
+    protected override RenderFragment RenderEditor()
+    {
+        return @<MudDatePicker
+                    @bind-Date="EditingDate"
+                    AdornmentIcon=""
+                    Class="mud-typography-body2 disable-margin"/>;
+    }
+
+    protected override void OnEditingValueChanged()
+    {
+        EditingDate = EditingValue;
+    }
+
+}

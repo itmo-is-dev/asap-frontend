@@ -1,0 +1,86 @@
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Subjects.Components
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourses.Components
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Subjects
+@using System.Reactive.Subjects
+@page "/subjects/{subjectId:guid}"
+
+@inject ISubjectProvider SubjectProvider
+@inject IJSRuntime Js
+
+@if (_subject is not null)
+{
+    <MudStack Row="true" AlignItems="AlignItems.Center" id="subject-header">
+
+        <SubjectsBreadcrumbComponent/>
+
+        <MudIcon Icon="@Icons.Material.Filled.ArrowRight"/>
+
+        <MudText Typo="Typo.h3">
+            <PhazorReactiveText Value="_subject.Name"/>
+        </MudText>
+
+        <MudSpacer/>
+
+        <PhazorBinding T="bool" Context="open">
+
+            <MudButton OnClick="@(() => open.OnNext(true))">
+                Create
+            </MudButton>
+
+            <PhazorReactiveValue Value="open" Context="visible">
+
+                <MudDialog
+                    IsVisible="visible"
+                    Options="DialogOptions"
+                    IsVisibleChanged="@(v => OnVisibleChanged(open, v))">
+
+                    <DialogContent>
+                        <CreateSubjectCourseComponent
+                            SubjectId="_subject.Id"
+                            OnSuccess="@(() => open.OnNext(false))"/>
+                    </DialogContent>
+
+                </MudDialog>
+
+            </PhazorReactiveValue>
+
+        </PhazorBinding>
+    </MudStack>
+
+    <SubjectCourseListComponent SubjectId="SubjectId"/>
+}
+
+<MudSpacer/>
+
+@code {
+
+    private static readonly DialogOptions DialogOptions = new DialogOptions
+    {
+        CloseButton = true,
+        CloseOnEscapeKey = true,
+    };
+
+    private ISubject? _subject;
+
+    [Parameter]
+    public Guid SubjectId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SubjectId.Equals(default))
+            return;
+
+        _subject = await SubjectProvider.LoadAsync(SubjectId, default);
+    }
+
+    private async void OnVisibleChanged(ISubject<bool> subject, bool visible)
+    {
+        if (visible)
+            return;
+
+        subject.OnNext(false);
+
+        await Js.InvokeVoidAsync("removeFocus", "#subject-header > .mud-button");
+    }
+
+}

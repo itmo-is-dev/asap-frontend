@@ -1,0 +1,47 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses
+@using Microsoft.Extensions.Logging
+@using Phazor.Components.Extensions
+@inject ISubjectCourseListProvider Provider
+@inject ILogger<SubjectCourseListComponent> Logger
+@inject NavigationManager NavigationManager
+
+@if (_subjectCourseList is not null)
+{
+    <MudList Clickable="true">
+
+        <PhazorReactiveForEach Elements="_subjectCourseList.Values" Context="subjectCourse">
+
+            <MudListItem
+                Value="@subjectCourse.Id"
+                OnClick="@(() => OnItemClicked(subjectCourse.Id))">
+
+                <PhazorReactiveText Value="@subjectCourse.Name"/>
+
+            </MudListItem>
+
+        </PhazorReactiveForEach>
+
+    </MudList>
+}
+
+@code {
+
+    private ISubjectCourseList? _subjectCourseList;
+
+    [Parameter]
+    public Guid SubjectId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SubjectId.Equals(default))
+            return;
+
+        _subjectCourseList = await Provider.LoadAsync(SubjectId, default);
+    }
+
+    private void OnItemClicked(Guid subjectCourseId)
+    {
+        NavigationManager.NavigateTo($"/courses/{subjectCourseId}");
+    }
+
+}

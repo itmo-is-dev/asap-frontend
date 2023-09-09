@@ -1,0 +1,64 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.GroupAssignments
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.GroupAssignments.Models
+@using System.Reactive.Linq
+@inject IGroupAssignmentService GroupAssignmentService
+
+@if (GroupAssignment is not null)
+{
+    <MudCard Elevation="5">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.body1">
+                    <PhazorReactiveText Value="GroupAssignment.GroupName"/>
+                </MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudSimpleTable
+                Elevation="0"
+                Outlined="false"
+                Dense="true"
+                Style="width: fit-content;">
+
+                <tbody>
+
+                <tr>
+                    <td>Deadline</td>
+                    <td>
+                        <PhazorBinding T="bool" ReplaySize="1" Context="editing">
+                            <EditableDateComponent
+                                IsEditing="editing"
+                                Value="GroupAssignment.Deadline"
+                                OnValueSubmitted="@(async v => editing.OnNext(await OnDeadlineSubmitted(v)))"/>
+                        </PhazorBinding>
+                    </td>
+                </tr>
+
+                </tbody>
+
+            </MudSimpleTable>
+        </MudCardContent>
+    </MudCard>
+}
+
+@code {
+
+    [Parameter]
+    public IGroupAssignment? GroupAssignment { get; set; }
+
+    // Returns IsEditing state
+    private async ValueTask<bool> OnDeadlineSubmitted(DateTime value)
+    {
+        if (GroupAssignment is null)
+            return false;
+
+        var result = await GroupAssignmentService.UpdateDeadlineAsync(
+            GroupAssignment.AssignmentId,
+            GroupAssignment.StudentGroupId,
+            value,
+            default);
+
+        return result is not UpdateDeadlineResult.Success;
+    }
+
+}

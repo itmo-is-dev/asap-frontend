@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" />
+        <PackageReference Include="Phazor.Extensions" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Application\Itmo.Dev.Asap.Frontend.Application.Abstractions\Itmo.Dev.Asap.Frontend.Application.Abstractions.csproj" />
+    </ItemGroup>
+
+
+</Project>

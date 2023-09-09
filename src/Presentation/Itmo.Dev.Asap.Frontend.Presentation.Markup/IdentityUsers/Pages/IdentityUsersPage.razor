@@ -1,0 +1,133 @@
+@page "/users/identity"
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Users.Models
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Users
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.IdentityUsers.Components
+@using System.Reactive.Linq
+@inject IUserService UserService
+@inject IDialogService DialogService
+
+<MudCard Class="pa-3 mb-3">
+    <MudStack Row="true" Justify="Justify.SpaceBetween">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+
+            <StringQueryParameterComponent
+                @ref="_nameQuery"
+                Label="Name"
+                PreviewWidth="80px"/>
+
+            <MudDivider Vertical="true"/>
+
+            <NumericQueryParameterComponent
+                T="int"
+                @ref="_universityIdQuery"
+                Label="University id"
+                PreviewWidth="100px"/>
+
+            <MudDivider Vertical="true"/>
+
+        </MudStack>
+
+        <MudIconButton
+            Icon="@Icons.Material.Outlined.Search"
+            Disabled="_isLoading"
+            OnClick="@SearchAsync"/>
+
+    </MudStack>
+</MudCard>
+
+<MudTable
+    Items="_users"
+    Loading="_isLoading"
+    LoadingProgressColor="Color.Info">
+
+    <HeaderContent>
+        <MudTh>First name</MudTh>
+        <MudTh>Middle name</MudTh>
+        <MudTh>Last name</MudTh>
+        <MudTh>University id</MudTh>
+        <MudTh>Github username</MudTh>
+        <MudTh Style="width: 150px;">
+            Identity
+        </MudTh>
+    </HeaderContent>
+
+    <RowTemplate>
+        <MudTd>
+            <PhazorReactiveText Value="context.FirstName"/>
+        </MudTd>
+        <MudTd>
+            <PhazorReactiveText Value="context.MiddleName"/>
+        </MudTd>
+        <MudTd>
+            <PhazorReactiveText Value="context.LastName"/>
+        </MudTd>
+        <MudTd>
+            <PhazorReactiveText Value="context.UniversityId.Select(x => x.ToString())"/>
+        </MudTd>
+        <MudTd>
+            <PhazorReactiveText Value="context.GithubUsername.Select(x => x ?? string.Empty)"/>
+        </MudTd>
+        <MudTh>
+            <PhazorReactiveValue Value="context.HasIdentity" Context="hasIdentity">
+                @if (hasIdentity is false)
+                {
+                    <MudButton OnClick="@(() => OnCreateButtonClicked(context))" Size="Size.Small">
+                        Create account
+                    </MudButton>
+                }
+            </PhazorReactiveValue>
+        </MudTh>
+    </RowTemplate>
+
+</MudTable>
+
+@code {
+
+    private static readonly DialogOptions DialogOptions = new DialogOptions
+    {
+        CloseButton = true,
+        CloseOnEscapeKey = true,
+    };
+
+    private StringQueryParameterComponent? _nameQuery;
+    private NumericQueryParameterComponent<int>? _universityIdQuery;
+
+    private bool _isLoading;
+
+    private IEnumerable<IIdentityUser> _users = Enumerable.Empty<IIdentityUser>();
+
+    private async Task SearchAsync()
+    {
+        if (_isLoading)
+            return;
+
+        var names = _nameQuery?.Values.ToArray();
+        var universityIds = _universityIdQuery?.Values.ToArray();
+
+        if (names is null or [] && universityIds is null or [])
+        {
+            return;
+        }
+
+        var query = new IdentityUserQueryModel(
+            NamePatterns: names ?? Array.Empty<string>(),
+            UniversityIds: universityIds ?? Array.Empty<int>());
+
+        _isLoading = true;
+
+        _users = await UserService.QueryIdentityUsersAsync(query, default);
+
+        _isLoading = false;
+    }
+
+    private async void OnCreateButtonClicked(IIdentityUser user)
+    {
+        var tcs = new TaskCompletionSource();
+
+        await DialogService.ShowTemplatedWithClosingAsync(
+            DialogOptions,
+            tcs.Task,
+            @<CreateUserAccountComponent User="user" OnSuccess="@(() => tcs.SetResult())"/>);
+    }
+
+}

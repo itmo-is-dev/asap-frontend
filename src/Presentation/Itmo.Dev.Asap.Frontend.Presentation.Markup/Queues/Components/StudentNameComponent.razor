@@ -1,0 +1,28 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Students
+@inject IStudentFactory StudentFactory
+
+@if (_student is not null)
+{
+    <PhazorReactiveText Value="_student.FirstName"/>
+    @(" ")
+    <PhazorReactiveText Value="_student.MiddleName"/>
+    @(" ")
+    <PhazorReactiveText Value="_student.LastName"/>
+}
+
+@code {
+
+    private IStudent? _student;
+
+    [Parameter]
+    public Guid StudentId { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (StudentId.Equals(default))
+            return;
+
+        _student = StudentFactory.Create(StudentId);
+    }
+
+}

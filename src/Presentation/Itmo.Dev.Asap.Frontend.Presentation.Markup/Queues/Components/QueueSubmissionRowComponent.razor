@@ -1,0 +1,53 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Queues
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Submissions
+
+@if (Submission is not null)
+{
+    <PhazorReactiveValue Value="Submission.State" Context="state">
+
+        <MudTd Style="@($"background-color: {SelectRowColor(state)}")">
+            <PhazorReactiveValue Value="Submission.StudentId" Context="studentId">
+                <StudentNameComponent StudentId="studentId"/>
+            </PhazorReactiveValue>
+        </MudTd>
+
+        <MudTd Style="@($"background-color: {SelectRowColor(state)}")">
+            <PhazorReactiveValue Value="Submission.StudentId" Context="studentId">
+                <StudentGroupNameComponent StudentId="studentId"/>
+            </PhazorReactiveValue>
+        </MudTd>
+
+        <MudTd Style="@($"background-color: {SelectRowColor(state)}")">
+            <PhazorReactiveText Value="Submission.AssignmentShortName"/>
+        </MudTd>
+
+        <MudTd Style="@($"background-color: {SelectRowColor(state)}")">
+            <PhazorReactiveValue Value="Submission.SubmissionDate" Context="submissionDate">
+                @submissionDate?.ToString("dd.MM.yyyy hh:mm:ss")
+            </PhazorReactiveValue>
+        </MudTd>
+
+        <MudTd Style="@($"background-color: {SelectRowColor(state)}")">
+            @state.ToString()
+        </MudTd>
+
+        <MudTd Style="@($"background-color: {SelectRowColor(state)}")">
+            <PhazorReactiveText Value="Submission.Payload"/>
+        </MudTd>
+
+    </PhazorReactiveValue>
+}
+
+@code {
+
+    [Parameter]
+    public IQueueSubmission? Submission { get; set; }
+
+    private string SelectRowColor(SubmissionState state)
+    {
+        return state is SubmissionState.Reviewed
+            ? "rgba(156, 235, 153, 1)"
+            : "transparent";
+    }
+
+}

@@ -1,0 +1,30 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses
+@inject ISubjectCourseService SubjectCourseService
+
+<MudCard Style="display: flex; flex-direction: column;">
+
+    <MudCardContent>
+        <MudText>Actions</MudText>
+    </MudCardContent>
+    
+    <MudSpacer/>
+
+    <MudCardActions>
+        <MudButton Variant="Variant.Text" OnClick="SyncPointsAsync">
+            Sync points
+        </MudButton>
+    </MudCardActions>
+
+</MudCard>
+
+@code {
+
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+    private async Task SyncPointsAsync()
+    {
+        await SubjectCourseService.SyncPointsAsync(SubjectCourseId, default);
+    }
+
+}

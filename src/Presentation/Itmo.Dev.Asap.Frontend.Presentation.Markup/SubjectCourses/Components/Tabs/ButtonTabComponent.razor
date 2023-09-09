@@ -1,0 +1,79 @@
+@inject IJSRuntime Js
+
+<MudStack
+    Row="true"
+    AlignItems="AlignItems.Center"
+    Justify="Justify.SpaceBetween"
+    Style="width: 100%"
+    id="@_id">
+
+    <MudText>@Label</MudText>
+
+    <div @onclick:stopPropagation="true">
+        <PhazorBinding T="bool" Context="open">
+
+            <MudIconButton
+                Icon="@Icons.Material.Filled.Add"
+                OnClick="@(() => open.OnNext(true))"
+                Style="padding: 0"/>
+
+            <PhazorReactiveValue Value="open" Context="visible">
+                <MudDialog
+                    IsVisible="visible"
+                    Options="DialogOptions"
+                    IsVisibleChanged="@(v => OnVisibleChanged(open, v))"
+                    ContentStyle="@DialogContentStyle">
+
+                    <DialogContent>
+
+                        @if (DialogContent is not null)
+                        {
+                            @DialogContent.Invoke(open)
+                        }
+
+                    </DialogContent>
+
+                </MudDialog>
+            </PhazorReactiveValue>
+
+        </PhazorBinding>
+    </div>
+
+</MudStack>
+
+
+@code {
+
+    private string? _id;
+
+    private static readonly DialogOptions DialogOptions = new DialogOptions
+    {
+        CloseButton = true,
+        CloseOnEscapeKey = true,
+    };
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public RenderFragment<IObserver<bool>>? DialogContent { get; set; }
+
+    [Parameter]
+    public string? DialogContentStyle { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _id = $"button-tab-component-{Guid.NewGuid()}";
+    }
+
+    private async void OnVisibleChanged(IObserver<bool> subject, bool visible)
+    {
+        if (visible)
+            return;
+
+        subject.OnNext(false);
+
+        await Js.InvokeVoidAsync("removeFocus", $"#{_id} > .mud-button");
+    }
+
+}

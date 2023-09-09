@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <NoWarn>$(NoWarn);BL0005;CA1716</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <SupportedPlatform Include="browser"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web"/>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly"/>
+        <PackageReference Include="MudBlazor"/>
+        <PackageReference Include="Phazor.Components" />
+        <PackageReference Include="Phazor.Extensions" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="wwwroot\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Pages\Index.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Application\Itmo.Dev.Asap.Frontend.Application.Abstractions\Itmo.Dev.Asap.Frontend.Application.Abstractions.csproj" />
+      <ProjectReference Include="..\Itmo.Dev.Asap.Frontend.Presentation.Components\Itmo.Dev.Asap.Frontend.Presentation.Components.csproj" />
+    </ItemGroup>
+
+</Project>

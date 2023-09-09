@@ -1,0 +1,97 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Assignments
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Assignments.Models
+@inject IAssignmentService AssignmentService
+
+<MudForm Style="width: 100%; max-width: 600px; min-width: 400px">
+
+    <MudField>
+        <MudTextField Label="Name" @bind-Value="_name"/>
+    </MudField>
+
+    <MudField>
+        <MudTextField Label="Short name" @bind-Value="_shortName"/>
+    </MudField>
+
+    <MudField>
+        <MudNumericField T="int?" Label="Order" @bind-Value="_order"/>
+    </MudField>
+
+    <MudField>
+        <MudNumericField T="double?" Label="Min points" @bind-Value="_minPoints"/>
+    </MudField>
+
+    <MudField>
+        <MudNumericField T="double?" Label="Max points" @bind-Value="_maxPoints"/>
+
+        @if (string.IsNullOrEmpty(MaxPointsError) is false)
+        {
+            <MudText Typo="Typo.caption" Color="Color.Error">
+                @MaxPointsError
+            </MudText>
+        }
+
+    </MudField>
+
+    <MudField>
+        <MudStack Justify="Justify.Center" Row="false">
+            <MudButton
+                Disabled="@(CreateButtonEnabled is false)"
+                Color="Color.Primary"
+                OnClick="OnCreateButtonClicked">
+                Create
+            </MudButton>
+        </MudStack>
+    </MudField>
+
+</MudForm>
+
+@code {
+    private string? _name;
+    private string? _shortName;
+    private int? _order;
+    private double? _minPoints;
+    private double? _maxPoints;
+
+    private string? MaxPointsError => _minPoints is null || _maxPoints is null || _maxPoints >= _minPoints
+        ? null
+        : "max points must be greater or equal to min points";
+
+    private bool CreateButtonEnabled =>
+        string.IsNullOrEmpty(_name) is false
+        && string.IsNullOrEmpty(_shortName) is false
+        && _order is not null
+        && _minPoints is not null
+        && _maxPoints is not null
+        && string.IsNullOrEmpty(MaxPointsError);
+
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+    [Parameter]
+    public EventCallback OnSuccess { get; set; }
+
+    private async Task OnCreateButtonClicked()
+    {
+        if (string.IsNullOrEmpty(_name)
+            || string.IsNullOrEmpty(_shortName)
+            || _order is null
+            || _minPoints is null
+            || _maxPoints is null)
+        {
+            return;
+        }
+
+        var result = await AssignmentService.CreateAsync(
+            SubjectCourseId,
+            _name,
+            _shortName,
+            _order.Value,
+            _minPoints.Value,
+            _maxPoints.Value,
+            default);
+
+        if (result is CreateAssignmentResult.Success)
+            await OnSuccess.InvokeAsync();
+    }
+
+}

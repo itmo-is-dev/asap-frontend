@@ -1,0 +1,68 @@
+﻿@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity
+@inject ICurrentUser CurrentUser
+
+<MudNavMenu Style="height: 100%">
+    <MudStack Justify="Justify.SpaceBetween" Style="height: 100%">
+        <div>
+            <PhazorReactiveIf Condition="@CurrentUser.HasMentorAccess()">
+                <MudNavLink
+                    Href="/subjects"
+                    Style="background: none;"
+                    Match="NavLinkMatch.All"
+                    Icon="@Icons.Material.Filled.LibraryBooks"
+                    ActiveClass="drawer-link-active">
+
+                    <MudText Typo="@Typo.h6">
+                        Subjects
+                    </MudText>
+
+                </MudNavLink>
+            </PhazorReactiveIf>
+
+            <PhazorReactiveIf Condition="@CurrentUser.HasModeratorAccess()">
+                <MudNavLink
+                    Href="/students"
+                    Style="background: none;"
+                    Match="NavLinkMatch.All"
+                    Icon="@Icons.Material.Filled.School"
+                    ActiveClass="drawer-link-active">
+
+                    <MudText Typo="Typo.h6">
+                        Students
+                    </MudText>
+
+                </MudNavLink>
+            </PhazorReactiveIf>
+
+            <PhazorReactiveIf Condition="@CurrentUser.HasModeratorAccess()">
+                <MudNavLink
+                    Href="/users/identity"
+                    Style="background: none;"
+                    Match="NavLinkMatch.All"
+                    Icon="@Icons.Material.Filled.People"
+                    ActiveClass="drawer-link-active">
+
+                    <MudText Typo="Typo.h6">
+                        Users
+                    </MudText>
+
+                </MudNavLink>
+            </PhazorReactiveIf>
+
+        </div>
+
+
+        <div>
+            <MudNavLink
+                Href="/logout"
+                Style="background: none;"
+                Icon="@Icons.Material.Filled.Logout">
+
+                <MudText Typo="@Typo.h6">
+                    Logout
+                </MudText>
+
+            </MudNavLink>
+        </div>
+    </MudStack>
+</MudNavMenu>

@@ -1,0 +1,35 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourseGroups
+@inject ISubjectCourseGroupListProvider SubjectCourseGroupListProvider 
+
+@if (_list is not null)
+{
+    <MudList>
+        <PhazorReactiveForEach Elements="_list.Values" Context="subjectCourseGroup">
+
+            <MudListItem
+                Value="@((subjectCourseGroup.SubjectCourseId, subjectCourseGroup.StudentGroupId))">
+
+                <PhazorReactiveText Value="subjectCourseGroup.GroupName"/>
+
+            </MudListItem>
+
+        </PhazorReactiveForEach>
+    </MudList>
+}
+
+@code {
+
+    private ISubjectCourseGroupList? _list;
+
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SubjectCourseId.Equals(default))
+            return;
+
+        _list = await SubjectCourseGroupListProvider.LoadAsync(SubjectCourseId, default);
+    }
+
+}

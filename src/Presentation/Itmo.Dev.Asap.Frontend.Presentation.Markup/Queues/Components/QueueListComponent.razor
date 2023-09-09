@@ -1,0 +1,53 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Queues
+@using System.Reactive.Subjects
+@inject IQueueListProvider QueueListProvider
+@inject IJSRuntime Js
+@inject IDialogService DialogService
+
+@if (_queueList is not null)
+{
+    <MudList Clickable="true">
+        <PhazorReactiveForEach Elements="_queueList.Items" Context="item">
+
+            <MudListItem
+                Value="item.StudentGroupId"
+                OnClick="@(() => OnListItemClicked(_queueList.SubjectCourseId, item.StudentGroupId))">
+
+                @item.StudentGroupName
+
+            </MudListItem>
+
+        </PhazorReactiveForEach>
+    </MudList>
+}
+
+@code {
+
+    private static readonly DialogOptions DialogOptions = new DialogOptions
+    {
+        FullScreen = true,
+        CloseButton = true,
+        CloseOnEscapeKey = true,
+    };
+
+    private IQueueList? _queueList;
+
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SubjectCourseId.Equals(default))
+            return;
+
+        _queueList = await QueueListProvider.LoadAsync(SubjectCourseId, default);
+    }
+
+    private void OnListItemClicked(Guid subjectCourseId, Guid studentGroupId)
+    {
+        DialogService.ShowTemplated(
+            DialogOptions,
+            @<QueueComponent SubjectCourseId="subjectCourseId" StudentGroupId="studentGroupId"/>);
+    }
+
+}

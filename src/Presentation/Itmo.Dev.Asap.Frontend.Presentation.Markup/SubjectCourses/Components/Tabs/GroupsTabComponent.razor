@@ -1,0 +1,22 @@
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourseGroups.Components
+
+<ButtonTabComponent
+    Label="Groups"
+    DialogContentStyle="min-width: 600px; max-width: 800px; min-height: 300px; display: flex; flex-direction: column;">
+
+    <DialogContent Context="open">
+
+        <CreateSubjectCourseGroupComponent
+            SubjectCourseId="SubjectCourseId"
+            OnSuccess="@(() => open.OnNext(false))"/>
+
+    </DialogContent>
+
+</ButtonTabComponent>
+
+@code {
+
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+}

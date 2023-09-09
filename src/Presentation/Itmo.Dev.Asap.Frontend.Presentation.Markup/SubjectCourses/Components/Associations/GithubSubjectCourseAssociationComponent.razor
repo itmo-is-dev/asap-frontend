@@ -1,0 +1,114 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses.Associations
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Github
+@inject IGithubService GithubService
+
+@if (Association is not null)
+{
+    <MudCard>
+        <MudCardContent>
+
+            <MudSimpleTable
+                Elevation="0"
+                Outlined="false"
+                Dense="true"
+                Style="width: fit-content;">
+
+                <thead>
+
+                <tr>
+                    <td rowspan="2" style="border-bottom: none">
+                        <MudText>GitHub</MudText>
+                    </td>
+                </tr>
+
+                </thead>
+                <tbody>
+
+                <tr>
+                    <td style="border-bottom: none">
+                        Organization
+                    </td>
+                    <td style="border-bottom: none">
+                        <MudLink
+                            Href="@($"https://github.com/{Association.OrganizationName}")"
+                            Typo="Typo.body2">
+
+                            @Association.OrganizationName
+
+                        </MudLink>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="border-bottom: none">
+                        Template repository
+                    </td>
+                    <td style="border-bottom: none">
+                        <MudLink
+                            Href="@($"https://github.com/{Association.OrganizationName}/{Association.TemplateRepositoryName}")"
+                            Typo="Typo.body2">
+
+                            @Association.TemplateRepositoryName
+
+                        </MudLink>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="border-bottom: none">
+                        Mentor team
+                    </td>
+                    <td style="border-bottom: none">
+                        <MudLink
+                            Href="@($"https://github.com/orgs/{Association.OrganizationName}/teams/{Association.MentorTeamName}")"
+                            Typo="Typo.body2">
+
+                            @Association.MentorTeamName
+
+                        </MudLink>
+                    </td>
+                </tr>
+
+                </tbody>
+
+            </MudSimpleTable>
+
+        </MudCardContent>
+
+        <MudCardActions>
+
+            <MudButton Variant="Variant.Text" OnClick="SyncMentorsAsync">
+                Sync mentors
+            </MudButton>
+
+            <MudButton Variant="Variant.Text" OnClick="SyncOrganizationAsync">
+                Sync organization
+            </MudButton>
+
+        </MudCardActions>
+
+    </MudCard>
+}
+
+@code {
+
+    [Parameter]
+    public GithubSubjectCourseAssociation? Association { get; set; }
+
+    private async Task SyncMentorsAsync()
+    {
+        if (Association is null)
+            return;
+
+        await GithubService.SyncMentorsAsync(Association.OrganizationId, default);
+    }
+
+    private async Task SyncOrganizationAsync()
+    {
+        if (Association is null)
+            return;
+
+        await GithubService.SyncOrganizationAsync(Association.SubjectCourseId, default);
+    }
+
+}

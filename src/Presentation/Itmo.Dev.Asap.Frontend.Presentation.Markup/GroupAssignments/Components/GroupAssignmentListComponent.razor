@@ -1,0 +1,32 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.GroupAssignments
+@inject IGroupAssignmentListProvider GroupAssignmentListProvider
+
+@if (_list is not null)
+{
+    <MudList>
+
+        <PhazorReactiveForEach Elements="_list.Values" Context="groupAssignment">
+            <MudListItem>
+                <GroupAssignmentComponent GroupAssignment="groupAssignment"/>
+            </MudListItem>
+        </PhazorReactiveForEach>
+
+    </MudList>
+}
+
+@code {
+
+    private IGroupAssignmentList? _list;
+
+    [Parameter]
+    public Guid AssignmentId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (AssignmentId.Equals(default))
+            return;
+
+        _list = await GroupAssignmentListProvider.LoadAsync(AssignmentId, default);
+    }
+
+}

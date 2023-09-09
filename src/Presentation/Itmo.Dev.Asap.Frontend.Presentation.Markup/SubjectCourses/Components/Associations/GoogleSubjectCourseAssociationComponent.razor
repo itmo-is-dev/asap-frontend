@@ -1,0 +1,32 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses.Associations
+
+@if (Association is not null)
+{
+    <MudCard>
+        <MudCardContent>
+
+            <MudText>Google</MudText>
+
+            <MudGrid>
+                <MudItem>Table</MudItem>
+                <MudItem>
+                    <MudLink
+                        Href="@($"https://docs.google.com/spreadsheets/d/{Association.SpreadsheetId}")"
+                        Typo="Typo.body2">
+
+                        @Association.SpreadsheetName
+
+                    </MudLink>
+                </MudItem>
+            </MudGrid>
+
+        </MudCardContent>
+    </MudCard>
+}
+
+@code {
+
+    [Parameter]
+    public GoogleSubjectCourseAssociation? Association { get; set; }
+
+}

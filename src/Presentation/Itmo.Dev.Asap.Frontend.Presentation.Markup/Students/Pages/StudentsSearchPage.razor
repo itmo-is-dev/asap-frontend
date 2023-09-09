@@ -1,0 +1,203 @@
+@page "/students"
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Students
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Students.Models
+@using System.Reactive.Linq
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.StudentGroups
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.StudentGroups.Models
+@inject IStudentService StudentService
+@inject IStudentGroupService StudentGroupService
+
+<MudCard Class="pa-3 mb-3">
+    <MudStack Row="true" Justify="Justify.SpaceBetween">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+
+            <StringQueryParameterComponent
+                @ref="_nameQuery"
+                Label="Name"
+                PreviewWidth="80px"/>
+
+            <MudDivider Vertical="true"/>
+
+            <StringQueryParameterComponent
+                @ref="_groupNameQuery"
+                Label="Group name"
+                PreviewWidth="150px"/>
+
+            <MudDivider Vertical="true"/>
+
+            <NumericQueryParameterComponent
+                T="int"
+                @ref="_universityIdQuery"
+                Label="University id"
+                PreviewWidth="100px"/>
+
+            <MudDivider Vertical="true"/>
+
+            <StringQueryParameterComponent
+                @ref="_githubUsernameQuery"
+                Label="Github username"
+                PreviewWidth="150px"/>
+
+            <MudDivider Vertical="true"/>
+
+        </MudStack>
+
+        <MudIconButton
+            Icon="@Icons.Material.Outlined.Search"
+            Disabled="_isLoading"
+            OnClick="@SearchAsync"/>
+
+    </MudStack>
+</MudCard>
+
+<MudTable
+    Items="_students"
+    Loading="_isLoading"
+    LoadingProgressColor="Color.Info">
+
+    <HeaderContent>
+        <MudTh>First name</MudTh>
+        <MudTh>Middle name</MudTh>
+        <MudTh>Last name</MudTh>
+        <MudTh Style="width: 290px">Group</MudTh>
+        <MudTh>University id</MudTh>
+        <MudTh>Github username</MudTh>
+    </HeaderContent>
+
+    <RowTemplate>
+        <MudTd>
+            <PhazorReactiveText Value="context.FirstName"/>
+        </MudTd>
+        <MudTd>
+            <PhazorReactiveText Value="context.MiddleName"/>
+        </MudTd>
+        <MudTd>
+            <PhazorReactiveText Value="context.LastName"/>
+        </MudTd>
+        <MudTd>
+            <PhazorBinding T="bool" ReplaySize="1" Context="editing">
+                <EditableAutocompleteComponent
+                    T="IStudentGroup"
+                    InputClass="pl-0"
+                    IsEditing="editing"
+                    Value="context.Group"
+                    SearchFunc="SearchGroupsAsync"
+                    OnValueSubmitted="@(async g => editing.OnNext(await UpdateStudentGroup(context, g)))">
+
+                    <ValueFragment Context="group">
+                        @if (group is not null)
+                        {
+                            <PhazorReactiveText Value="group.Name"/>
+                        }
+                        else
+                        {
+                            @("no group")
+                        }
+                    </ValueFragment>
+
+                    <ItemFragment Context="group">
+                        @if (group is not null)
+                        {
+                            <PhazorReactiveText Value="group.Name"/>
+                        }
+                    </ItemFragment>
+
+                    <SelectedValueFragment Context="group">
+
+                        <PhazorReactiveNullableValue
+                            Value="@(group?.Name ?? Observable.Empty<string>())"
+                            Context="groupName">
+
+                            @if (string.IsNullOrEmpty(groupName))
+                            {
+                                @("no group")
+                            }
+                            else
+                            {
+                                @groupName
+                            }
+
+                        </PhazorReactiveNullableValue>
+                    </SelectedValueFragment>
+
+                </EditableAutocompleteComponent>
+            </PhazorBinding>
+        </MudTd>
+        <MudTd>
+            <PhazorReactiveText Value="context.UniversityId.Select(x => x.ToString())"/>
+        </MudTd>
+        <MudTd>
+            <PhazorReactiveText Value="context.GithubUsername.Select(x => x ?? string.Empty)"/>
+        </MudTd>
+    </RowTemplate>
+
+</MudTable>
+
+@code {
+    private StringQueryParameterComponent? _nameQuery;
+    private StringQueryParameterComponent? _groupNameQuery;
+    private NumericQueryParameterComponent<int>? _universityIdQuery;
+    private StringQueryParameterComponent? _githubUsernameQuery;
+
+    private bool _isLoading;
+
+    private IEnumerable<IStudent> _students = Enumerable.Empty<IStudent>();
+
+    private async Task SearchAsync()
+    {
+        if (_isLoading)
+            return;
+
+        var names = _nameQuery?.Values.ToArray();
+        var groupNames = _groupNameQuery?.Values.ToArray();
+        var universityIds = _universityIdQuery?.Values.ToArray();
+        var githubUsernames = _githubUsernameQuery?.Values.ToArray();
+
+        if (names is null or []
+            && groupNames is null or []
+            && universityIds is null or []
+            && githubUsernames is null or [])
+        {
+            return;
+        }
+
+        var query = new StudentQueryModel(
+            NamePatterns: names ?? Array.Empty<string>(),
+            GroupNamePatterns: groupNames ?? Array.Empty<string>(),
+            UniversityIds: universityIds ?? Array.Empty<int>(),
+            GithubUsernamePatterns: githubUsernames ?? Array.Empty<string>());
+
+        _isLoading = true;
+
+        _students = await StudentService.QueryStudentsAsync(query, default);
+
+        _isLoading = false;
+    }
+
+    private async Task<IEnumerable<IStudentGroup>> SearchGroupsAsync(string q, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(q))
+            return Enumerable.Empty<IStudentGroup>();
+
+        var names = new[]
+        {
+            q
+        };
+
+        var query = new StudentGroupQueryModel(
+            Enumerable.Empty<Guid>(),
+            names,
+            Enumerable.Empty<Guid>());
+
+        return await StudentGroupService.QueryGroupsAsync(query, cancellationToken);
+    }
+
+    // Returns IsEditing state
+    private async Task<bool> UpdateStudentGroup(IStudent student, IStudentGroup? studentGroup)
+    {
+        var result = await StudentService.TransferStudentAsync(student.Id, studentGroup?.Id, default);
+
+        return result is not TransferStudentResult.Success;
+    }
+
+}

@@ -1,0 +1,117 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity.Models
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Users
+@inject IIdentityService IdentityService
+
+@if (User is not null)
+{
+    <MudForm Style="width: 100%; max-width: 600px; min-width: 400px">
+
+        <PhazorReactiveValue Value="User.FirstName">
+            <MudTextField Label="First name" Value="context" Disabled="true"/>
+        </PhazorReactiveValue>
+
+        <PhazorReactiveValue Value="User.MiddleName">
+            <MudTextField Label="Middle name" Value="context" Disabled="true"/>
+        </PhazorReactiveValue>
+
+        <PhazorReactiveValue Value="User.LastName">
+            <MudTextField Label="Last name" Value="context" Disabled="true"/>
+        </PhazorReactiveValue>
+
+        <MudTextField Label="Username" @bind-Value="_username"/>
+
+        <MudTextField 
+            Label="Password"
+            @bind-Value="_password" 
+            InputType="InputType.Password"
+            Immediate="true"/>
+
+        <MudTextField 
+            Label="Confirm password"
+            @bind-Value="_confirmPassword"
+            InputType="InputType.Password"
+            Immediate="true"/>
+
+        @if (string.IsNullOrEmpty(PasswordError) is false)
+        {
+            <MudText Typo="Typo.caption" Color="Color.Error">
+                @PasswordError
+            </MudText>
+        }
+
+        <MudSelect Label="Role name" AnchorOrigin="Origin.BottomCenter" @bind-Value="_roleName">
+            @foreach (var roleName in _roleNames)
+            {
+                <MudSelectItem Value="roleName"/>
+            }
+        </MudSelect>
+
+
+        <MudStack Justify="Justify.Center" Row="false" Class="mt-5 mb-2">
+            <MudButton
+                Disabled="@(CreateButtonEnabled is false)"
+                Color="Color.Primary"
+                OnClick="@OnCreateButtonClicked">
+                Create
+            </MudButton>
+        </MudStack>
+
+    </MudForm>
+}
+
+@code {
+
+    private IEnumerable<string> _roleNames = Enumerable.Empty<string>();
+
+    private string? _username;
+    private string? _password;
+    private string? _confirmPassword;
+    private string? _roleName;
+
+    private string? PasswordError => StringComparer.Ordinal.Equals(_password, _confirmPassword)
+        ? null
+        : "Passwords does not match";
+
+    private bool CreateButtonEnabled =>
+        string.IsNullOrEmpty(_username) is false
+        && string.IsNullOrEmpty(_password) is false
+        && string.IsNullOrEmpty(_confirmPassword) is false
+        && string.IsNullOrEmpty(PasswordError)
+        && string.IsNullOrEmpty(_roleName) is false;
+
+    [Parameter]
+    public IIdentityUser? User { get; set; }
+
+    [Parameter]
+    public EventCallback OnSuccess { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _roleNames = await IdentityService.GetRolesAsync(default);
+    }
+
+    private async Task OnCreateButtonClicked()
+    {
+        if (User is null
+            || string.IsNullOrEmpty(_username)
+            || string.IsNullOrEmpty(_password)
+            || string.IsNullOrEmpty(_confirmPassword)
+            || string.IsNullOrEmpty(PasswordError) is false
+            || string.IsNullOrEmpty(_roleName))
+        {
+            return;
+        }
+
+        var result = await IdentityService.CreateUserAccount(
+            User.Id,
+            _username,
+            _password,
+            _roleName,
+            default);
+
+        if (result is CreateUserAccountResult.Success)
+            await OnSuccess.InvokeAsync();
+    }
+
+}
