@@ -77,12 +77,32 @@
 
         <MudCardActions>
 
-            <MudButton Variant="Variant.Text" OnClick="SyncMentorsAsync">
+            <MudButton
+                Variant="Variant.Text"
+                OnClick="@SyncMentorsAsync"
+                Disabled="@_syncMentorsInProgress">
+
+                @if (_syncMentorsInProgress)
+                {
+                    <MudProgressCircular Indeterminate="true" Size="Size.Small"/>
+                }
+
                 Sync mentors
+
             </MudButton>
 
-            <MudButton Variant="Variant.Text" OnClick="SyncOrganizationAsync">
+            <MudButton
+                Variant="Variant.Text"
+                OnClick="@SyncOrganizationAsync"
+                Disabled="@_syncOrganizationInProgress">
+
+                @if (_syncOrganizationInProgress)
+                {
+                    <MudProgressCircular Indeterminate="true" Size="Size.Small"/>
+                }
+
                 Sync organization
+
             </MudButton>
 
         </MudCardActions>
@@ -92,23 +112,34 @@
 
 @code {
 
+    private bool _syncMentorsInProgress;
+    private bool _syncOrganizationInProgress;
+
     [Parameter]
     public GithubSubjectCourseAssociation? Association { get; set; }
 
     private async Task SyncMentorsAsync()
     {
-        if (Association is null)
+        if (Association is null || _syncMentorsInProgress)
             return;
 
+        _syncMentorsInProgress = true;
+
         await GithubService.SyncMentorsAsync(Association.OrganizationId, default);
+
+        _syncMentorsInProgress = false;
     }
 
     private async Task SyncOrganizationAsync()
     {
-        if (Association is null)
+        if (Association is null || _syncOrganizationInProgress)
             return;
 
+        _syncOrganizationInProgress = true;
+
         await GithubService.SyncOrganizationAsync(Association.SubjectCourseId, default);
+
+        _syncOrganizationInProgress = false;
     }
 
 }

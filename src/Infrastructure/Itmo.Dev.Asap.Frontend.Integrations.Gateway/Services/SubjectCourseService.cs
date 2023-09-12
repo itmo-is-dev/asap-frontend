@@ -1,4 +1,4 @@
-using Itmo.Dev.Asap.Frontend.Application.Abstractions.Errors.Events;
+using Itmo.Dev.Asap.Frontend.Application.Abstractions.Notifications.Events;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses.Associations;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses.Events;
@@ -75,7 +75,18 @@ internal class SubjectCourseService : ISubjectCourseService
 
     public async ValueTask SyncPointsAsync(Guid subjectCourseId, CancellationToken cancellationToken)
     {
-        await _subjectCourseClient.ForceSyncPointsAsync(subjectCourseId, cancellationToken);
+        IApiResponse response = await _subjectCourseClient.ForceSyncPointsAsync(subjectCourseId, cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var evt = new SuccessfulOperationOccured("Successfully started points update");
+            _publisher.Publish(evt);
+        }
+        else
+        {
+            var evt = new ErrorOccured("Failed to start points update");
+            _publisher.Publish(evt);
+        }
     }
 
     public async ValueTask<CreateSubjectCourseResult> CreateAsync(

@@ -1,6 +1,8 @@
 ﻿@using Itmo.Dev.Asap.Frontend.Application.Events
-@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Errors.Events
 @using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Notifications.Events
+@using System.Reactive.Disposables
+@using Phazor.Extensions
 @inherits LayoutComponentBase
 @implements IDisposable
 @inject IEventProvider Provider
@@ -56,7 +58,7 @@
         ? AsapFrontendTheme.Instance.PaletteDark.DrawerBackground.Value
         : AsapFrontendTheme.Instance.Palette.DrawerBackground.Value;
 
-    private IDisposable? _disposable;
+    private IDisposable _disposable = Disposable.Empty;
 
     private bool _open;
 
@@ -64,12 +66,23 @@
 
     protected override void OnInitialized()
     {
-        _disposable = Provider.Observe<ErrorOccured>().Subscribe(e => Snackbar.Add(e.Message, Severity.Error));
+        _disposable.Dispose();
+        _disposable = Disposable.Empty;
+
+        Provider
+            .Observe<ErrorOccured>()
+            .Subscribe(e => Snackbar.Add(e.Message, Severity.Error))
+            .CombineTo(ref _disposable);
+
+        Provider
+            .Observe<SuccessfulOperationOccured>()
+            .Subscribe(e => Snackbar.Add(e.Message, Severity.Success))
+            .CombineTo(ref _disposable);
     }
 
     public void Dispose()
     {
-        _disposable?.Dispose();
+        _disposable.Dispose();
     }
 
 }

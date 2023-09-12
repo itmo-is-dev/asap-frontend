@@ -1,7 +1,7 @@
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Assignments;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Assignments.Events;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Assignments.Models;
-using Itmo.Dev.Asap.Frontend.Application.Abstractions.Errors.Events;
+using Itmo.Dev.Asap.Frontend.Application.Abstractions.Notifications.Events;
 using Itmo.Dev.Asap.Frontend.Application.Events;
 using Itmo.Dev.Asap.Gateway.Application.Dto.Study;
 using Itmo.Dev.Asap.Gateway.Presentation.Abstractions.Models;

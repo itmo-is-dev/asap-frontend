@@ -1,7 +1,7 @@
-using Itmo.Dev.Asap.Frontend.Application.Abstractions.Errors.Events;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity.Events;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity.Models;
+using Itmo.Dev.Asap.Frontend.Application.Abstractions.Notifications.Events;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Users.Events;
 using Itmo.Dev.Asap.Frontend.Application.Events;
 using Itmo.Dev.Asap.Frontend.Integrations.Gateway.Mapping;

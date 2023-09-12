@@ -6,12 +6,22 @@
     <MudCardContent>
         <MudText>Actions</MudText>
     </MudCardContent>
-    
+
     <MudSpacer/>
 
     <MudCardActions>
-        <MudButton Variant="Variant.Text" OnClick="SyncPointsAsync">
+        <MudButton
+            Variant="Variant.Text"
+            OnClick="@SyncPointsAsync"
+            Disabled="@_syncPointsInProcess">
+
+            @if (_syncPointsInProcess)
+            {
+                <MudProgressCircular Indeterminate="true" Size="Size.Small"/>
+            }
+
             Sync points
+
         </MudButton>
     </MudCardActions>
 
@@ -19,12 +29,21 @@
 
 @code {
 
+    private bool _syncPointsInProcess;
+
     [Parameter]
     public Guid SubjectCourseId { get; set; }
 
     private async Task SyncPointsAsync()
     {
+        if (_syncPointsInProcess)
+            return;
+
+        _syncPointsInProcess = true;
+        
         await SubjectCourseService.SyncPointsAsync(SubjectCourseId, default);
+
+        _syncPointsInProcess = false;
     }
 
 }

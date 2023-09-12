@@ -1,4 +1,4 @@
-using Itmo.Dev.Asap.Frontend.Application.Abstractions.Errors.Events;
+using Itmo.Dev.Asap.Frontend.Application.Abstractions.Notifications.Events;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.StudentGroups;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.StudentGroups.Events;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Students;

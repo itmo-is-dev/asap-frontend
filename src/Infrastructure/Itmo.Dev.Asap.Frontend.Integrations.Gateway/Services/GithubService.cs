@@ -1,6 +1,6 @@
-using Itmo.Dev.Asap.Frontend.Application.Abstractions.Errors.Events;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Github;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Github.Models;
+using Itmo.Dev.Asap.Frontend.Application.Abstractions.Notifications.Events;
 using Itmo.Dev.Asap.Frontend.Application.Events;
 using Itmo.Dev.Asap.Gateway.Application.Dto.Github;
 using Itmo.Dev.Asap.Gateway.Sdk.Clients;
@@ -23,12 +23,33 @@ internal class GithubService : IGithubService
 
     public async ValueTask SyncMentorsAsync(long organizationId, CancellationToken cancellationToken)
     {
-        await _client.ForceMentorSyncAsync(organizationId, cancellationToken);
+        IApiResponse response = await _client.ForceMentorSyncAsync(organizationId, cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var evt = new SuccessfulOperationOccured("Successfully synchronized mentors");
+            _publisher.Publish(evt);
+        }
+        else
+        {
+            var evt = new ErrorOccured("Failed to sync mentors");
+            _publisher.Publish(evt);
+        }
     }
 
     public async ValueTask SyncOrganizationAsync(Guid subjectCourseId, CancellationToken cancellationToken)
     {
-        await _client.ForceOrganizationUpdateAsync(subjectCourseId, cancellationToken);
+        IApiResponse response = await _client.ForceOrganizationUpdateAsync(subjectCourseId, cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var evt = new SuccessfulOperationOccured("Successfully synchronized organization");
+            _publisher.Publish(evt);
+        }
+        else
+        {
+            var evt = new ErrorOccured("Failed to sync organization");
+        }
     }
 
     public async Task<IEnumerable<GithubOrganization>> SearchOrganizationsAsync(
