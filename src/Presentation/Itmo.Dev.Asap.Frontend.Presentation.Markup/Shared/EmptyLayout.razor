@@ -1,0 +1,19 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="@AsapFrontendTheme.Instance"/>
+<MudDialogProvider CloseOnEscapeKey="true"/>
+<MudSnackbarProvider/>
+
+<MudLayout
+    Class="mud-height-full"
+    Style="overflow:hidden; position:relative;">
+
+    <MudMainContent Class="d-flex justify-center align-center mud-height-full" Style="padding: 0">
+        <MudContainer Class="mt-6 mb-5" MaxWidth="MaxWidth.ExtraLarge">
+
+            @Body
+
+        </MudContainer>
+    </MudMainContent>
+
+</MudLayout>

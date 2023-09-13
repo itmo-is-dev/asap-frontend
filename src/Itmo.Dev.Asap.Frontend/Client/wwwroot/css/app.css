@@ -1,0 +1,87 @@
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+@keyframes loader {
+    0% {
+        max-width: 1ch;
+    }
+
+    50% {
+        max-width: 2ch;
+    }
+
+    100% {
+        max-width: 3ch;
+    }
+}
+
+#loading-progress {
+    animation: loader 2s infinite;
+}
+
+.hide-scroll-bar {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.hide-scroll-bar::-webkit-scrollbar { /* WebKit */
+    width: 0;
+    height: 0;
+}
+
+.mud-tab:has(button:hover) {
+    background: unset !important;
+}
+
+.mud-list.disable-highlight > .mud-list-item:hover {
+    background: unset;
+}
+
+.disable-hover:hover {
+    background: unset !important;
+}
+
+.disable-margin .mud-input {
+    margin: 0 !important;
+}
+
+.disable-margin .mud-input-control {
+    margin: 0 !important;
+}
+
+.mud-input-control.disable-margin {
+    margin: 0 !important;
+}
+
+.disable-padding .mud-input {
+    padding: 0 !important;
+}
+
+.mud-picker.mud-typography-body2, .mud-input-control.mud-typography-body2 {
+
+    & input[type="text"] {
+        font-size: var(--mud-typography-body2-size);
+        font-family: var(--mud-typography-body2-family);
+        font-weight: var(--mud-typography-body2-weight);
+        line-height: var(--mud-typography-body2-lineheight);
+        letter-spacing: var(--mud-typography-body2-letterspacing);
+        text-transform: var(--mud-typography-body2-text-transform);
+    }
+}
+
+.drawer-link-active {
+    color: var(--mud-palette-drawer-text);
+
+    & .mud-typography {
+        font-weight: bold;
+    }
+}
+
+.mud-link {
+    text-decoration: underline !important;
+}
+
+.mud-link-underline-hover:hover {
+    color: var(--mud-palette-secondary) !important;
+}

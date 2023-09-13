@@ -1,0 +1,72 @@
+@namespace Itmo.Dev.Asap.Frontend.Presentation.Components
+@typeparam T
+@using System.Reactive.Linq
+@inherits EditableValueComponent<T>
+
+@{
+    base.BuildRenderTree(__builder);
+}
+
+@code {
+
+    public override string ValueWidth { get; set; } = "170px";
+
+    [Parameter]
+    public RenderFragment<T>? ValueFragment { get; set; }
+
+    [Parameter]
+    public RenderFragment<T>? ItemFragment { get; set; }
+
+    [Parameter]
+    public RenderFragment<T?>? SelectedValueFragment { get; set; }
+
+    [Parameter]
+    public Func<string, CancellationToken, Task<IEnumerable<T>>>? SearchFunc { get; set; }
+
+    protected override RenderFragment RenderValue(T value)
+    {
+        return ValueFragment?.Invoke(value) ?? (@<div></div>);
+    }
+
+    protected override RenderFragment RenderEditor()
+    {
+        return @<PhazorBinding T="bool" Context="autocompleteVisibility">
+                   <PhazorReactiveNullableValue Value="autocompleteVisibility" Context="autocompleteVisible">
+                       @if (autocompleteVisible)
+                       {
+                           <MudAutocomplete
+                               T="T"
+                               SearchFuncWithCancel="SearchFunc"
+                               ToStringFunc="@(_ => string.Empty)"
+                               DebounceInterval="500"
+                               Clearable="true"
+                               ShowProgressIndicator="true"
+                               Class="mud-typography-body2 disable-margin"
+                               Style="z-index: 1"
+                               AutoFocus="true"
+                               ValueChanged="@(v => { EditingValue = v; autocompleteVisibility.OnNext(false); })">
+
+                               <ItemTemplate>
+                                   @if (ItemFragment is not null)
+                                   {
+                                       @ItemFragment.Invoke(context)
+                                   }
+                               </ItemTemplate>
+
+                           </MudAutocomplete>
+                       }
+                       else
+                       {
+                           <div
+                               @onclick="@(() => { autocompleteVisibility.OnNext(true); EditingValue = default; })"
+                               style="border-bottom: 2px solid black;">
+
+                               @SelectedValueFragment?.Invoke(EditingValue)
+
+                           </div>
+                       }
+                   </PhazorReactiveNullableValue>
+               </PhazorBinding>;
+    }
+
+}

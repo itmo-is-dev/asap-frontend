@@ -1,0 +1,40 @@
+﻿@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Shared
+@inject NavigationManager NavigationManager
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly"
+            AdditionalAssemblies="@(new[] { typeof(MainLayout).Assembly })">
+
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                <NotAuthorized>
+                    @{ NavigationManager.NavigateTo("/login"); }
+                </NotAuthorized>
+            </AuthorizeRouteView>
+
+            <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
+        </Found>
+
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="@typeof(EmptyLayout)">
+
+                <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+
+                    <MudStack Style="width: fit-content">
+                        <MudText Style="width: 100%" Align="Align.Center" Typo="Typo.h1">
+                            404
+                        </MudText>
+
+                        <MudText Typo="Typo.caption" Align="Align.Center">
+                            no content on this page
+                        </MudText>
+                    </MudStack>
+
+                </MudStack>
+
+            </LayoutView>
+        </NotFound>
+
+    </Router>
+</CascadingAuthenticationState>

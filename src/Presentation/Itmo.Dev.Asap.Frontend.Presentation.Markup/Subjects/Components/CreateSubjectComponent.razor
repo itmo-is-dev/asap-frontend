@@ -1,0 +1,42 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Subjects
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Subjects.Models
+@inject ISubjectService SubjectService
+
+<MudForm Style="width: 100%; max-width: 500px;">
+
+    <MudField>
+        <MudTextField Label="Name" @bind-Value="_name"/>
+    </MudField>
+
+    <MudStack Justify="Justify.Center" Row="false">
+        <MudButton
+            Disabled="@(CreateButtonEnabled is false)"
+            Color="Color.Primary"
+            OnClick="OnCreateButtonClicked">
+            Create
+        </MudButton>
+    </MudStack>
+
+</MudForm>
+
+@code {
+
+    private string? _name;
+
+    private bool CreateButtonEnabled => string.IsNullOrEmpty(_name) is false;
+    
+    [Parameter]
+    public EventCallback OnSuccess { get; set; }
+
+    private async Task OnCreateButtonClicked()
+    {
+        if (string.IsNullOrEmpty(_name))
+            return;
+
+        var result = await SubjectService.CreateAsync(_name, default);
+
+        if (result is CreateSubjectResult.Success)
+            await OnSuccess.InvokeAsync();
+    }
+
+}

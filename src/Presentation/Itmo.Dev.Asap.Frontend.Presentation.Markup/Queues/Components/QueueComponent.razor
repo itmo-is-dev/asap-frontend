@@ -1,0 +1,53 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Queues
+@implements IAsyncDisposable
+@inject IQueueProvider QueueProvider
+
+@if (_queue is not null)
+{
+    <PhazorReactiveValue Value="_queue.Submissions" Context="submissions">
+
+        <MudTable Items="submissions">
+
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Group</MudTh>
+                <MudTh>Assignment</MudTh>
+                <MudTh>Date</MudTh>
+                <MudTh>State</MudTh>
+                <MudTh>Github</MudTh>
+            </HeaderContent>
+
+            <RowTemplate Context="submission">
+                <QueueSubmissionRowComponent Submission="submission"/>
+            </RowTemplate>
+
+        </MudTable>
+
+    </PhazorReactiveValue>
+}
+
+@code {
+
+    private IQueue? _queue;
+
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+    [Parameter]
+    public Guid StudentGroupId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SubjectCourseId.Equals(default) || StudentGroupId.Equals(default))
+            return;
+
+        _queue = await QueueProvider.LoadAsync(SubjectCourseId, StudentGroupId, default);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_queue is not null)
+            await _queue.DisposeAsync();
+    }
+
+}

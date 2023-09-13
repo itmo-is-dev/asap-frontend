@@ -1,0 +1,14 @@
+@namespace Itmo.Dev.Asap.Frontend.Presentation.Components
+@typeparam T
+
+@Fragment?.Invoke(Value)
+
+@code {
+
+    [Parameter]
+    public T? Value { get; set; }
+
+    [Parameter]
+    public RenderFragment<T?>? Fragment { get; set; }
+
+}

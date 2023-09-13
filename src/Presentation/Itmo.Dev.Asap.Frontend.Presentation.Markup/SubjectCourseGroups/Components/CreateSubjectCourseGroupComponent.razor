@@ -1,0 +1,113 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.StudentGroups
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.StudentGroups.Models
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourseGroups
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourseGroups.Models
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourseGroups.Models
+@inject IStudentGroupService StudentGroupService
+@inject ISubjectCourseGroupService SubjectCourseGroupService
+
+<MudStack
+    Row="false"
+    Style="height: 100%; flex-grow: 1"
+    Justify="Justify.SpaceBetween">
+
+    <MudStack Row="false">
+        @foreach (var frame in _frames)
+        {
+            <StudentGroupFrameComponent
+                Frame="frame"
+                SearchFunc="SearchAsync"
+                OnFrameRemoved="RemoveFrame"
+                StateChanged="StateHasChanged"/>
+        }
+
+        @if (AddFrameButtonEnabled)
+        {
+            <MudButton
+                Variant="Variant.Outlined"
+                OnClick="@(() => _frames.Add(new StudentGroupFrame()))">
+
+                Add another group
+
+            </MudButton>
+        }
+    </MudStack>
+
+    <MudButton
+        Variant="Variant.Outlined"
+        Disabled="@(!AddGroupsButtonEnabled)"
+        OnClick="@OnAddGroupsClickAsync">
+
+        Add groups
+
+    </MudButton>
+
+</MudStack>
+
+@code {
+
+    private IEnumerable<Guid> _subjectCourseIds = Enumerable.Empty<Guid>();
+
+    private readonly List<StudentGroupFrame> _frames = new List<StudentGroupFrame>();
+
+    private bool AddFrameButtonEnabled => _frames.All(x => x.StudentGroup is not null);
+
+    private bool AddGroupsButtonEnabled => _frames is not [] && _frames.All(x => x.StudentGroup is not null);
+
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+    [Parameter]
+    public EventCallback OnSuccess { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _subjectCourseIds = new[]
+        {
+            SubjectCourseId,
+        };
+
+        _frames.Clear();
+        _frames.Add(new StudentGroupFrame());
+    }
+
+    private void RemoveFrame(StudentGroupFrame frame)
+    {
+        _frames.Remove(frame);
+
+        if (_frames is [])
+            _frames.Add(new StudentGroupFrame());
+    }
+
+    private async Task<IEnumerable<IStudentGroup>> SearchAsync(string q, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(q))
+            return Enumerable.Empty<IStudentGroup>();
+
+        IEnumerable<Guid> excludedIds = _frames
+            .Where(x => x.StudentGroup is not null)
+            .Select(x => x.StudentGroup!.Id);
+
+        var namePatterns = new[]
+        {
+            q,
+        };
+
+        var query = new StudentGroupQueryModel(excludedIds, namePatterns, _subjectCourseIds);
+
+        return await StudentGroupService.QueryGroupsAsync(query, cancellationToken);
+    }
+
+    private async Task OnAddGroupsClickAsync()
+    {
+        IEnumerable<Guid> groupIds = _frames
+            .Where(x => x.StudentGroup is not null)
+            .Select(x => x.StudentGroup!.Id);
+
+        var result = await SubjectCourseGroupService.CreateAsync(SubjectCourseId, groupIds, default);
+
+        if (result is CreateSubjectCourseGroupResult.Success)
+            await OnSuccess.InvokeAsync();
+    }
+
+}

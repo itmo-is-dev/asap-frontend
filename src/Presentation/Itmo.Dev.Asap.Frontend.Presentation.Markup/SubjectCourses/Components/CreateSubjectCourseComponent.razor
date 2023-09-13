@@ -1,0 +1,191 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses.Models
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Github.Models
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Github
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses
+
+@inject IGithubService GithubService
+@inject ISubjectCourseService SubjectCourseService
+
+<MudForm Style="width: 100%; max-width: 600px; min-width: 400px">
+
+    <MudField>
+        <MudTextField Label="Name" @bind-Value="_name"/>
+    </MudField>
+
+    <MudField>
+        <MudSelect
+            T="SubjectCourseWorkflow?"
+            Label="Workflow type"
+            AnchorOrigin="Origin.BottomCenter"
+            @bind-Value="_workflow">
+
+            <MudSelectItem T="SubjectCourseWorkflow?" Value="SubjectCourseWorkflow.ReviewWithDefense">
+                Review with defence
+            </MudSelectItem>
+
+            <MudSelectItem T="SubjectCourseWorkflow?" Value="SubjectCourseWorkflow.ReviewOnly">
+                Review only
+            </MudSelectItem>
+
+        </MudSelect>
+    </MudField>
+
+    <MudField>
+
+        <MudAutocomplete
+            T="GithubOrganization"
+            Label="Organization"
+            SearchFuncWithCancel="SearchOrganizations"
+            ValueChanged="OnOrganizationChanged"
+            DebounceInterval="1000"
+            ShowProgressIndicator="true"
+            ToStringFunc="o => o.Name">
+
+            <ItemTemplate Context="organization">
+
+                <MudStack
+                    Row="true"
+                    Justify="Justify.FlexStart"
+                    AlignItems="AlignItems.Center">
+
+                    <MudImage Src="@organization.AvatarUrl" Height="32"/>
+                    @organization.Name
+
+                </MudStack>
+
+            </ItemTemplate>
+
+        </MudAutocomplete>
+
+    </MudField>
+
+    @if (_organization is not null)
+    {
+        <MudField>
+            <MudAutocomplete
+                T="GithubRepository"
+                Label="Template repository"
+                SearchFuncWithCancel="@((q, c) => SearchRepositories(_organization.Id, q, c))"
+                @bind-Value="_templateRepository"
+                DebounceInterval="1000"
+                ShowProgressIndicator="true"
+                ToStringFunc="o => o.Name">
+
+                <ItemTemplate Context="repository">
+                    @repository.Name
+                </ItemTemplate>
+
+            </MudAutocomplete>
+        </MudField>
+
+        <MudField>
+            <MudAutocomplete
+                T="GithubTeam"
+                Label="Mentor team"
+                SearchFuncWithCancel="@((q, c) => SearchTeams(_organization.Id, q, c))"
+                @bind-Value="_mentorTeam"
+                DebounceInterval="1000"
+                ShowProgressIndicator="true"
+                ToStringFunc="o => o.Name">
+
+                <ItemTemplate Context="team">
+                    @team.Name
+                </ItemTemplate>
+
+            </MudAutocomplete>
+        </MudField>
+    }
+
+    <MudStack Justify="Justify.Center" Row="false">
+        <MudButton
+            Disabled="@(CreateButtonEnabled is false)"
+            Color="Color.Primary"
+            OnClick="OnCreateButtonClicked">
+            Create
+        </MudButton>
+    </MudStack>
+
+</MudForm>
+
+@code {
+
+    private string? _name;
+    private SubjectCourseWorkflow? _workflow;
+
+    private GithubOrganization? _organization;
+    private GithubRepository? _templateRepository;
+    private GithubTeam? _mentorTeam;
+
+    private bool CreateButtonEnabled =>
+        string.IsNullOrEmpty(_name) is false
+        && _workflow is not null
+        && _organization is not null
+        && _templateRepository is not null
+        && _mentorTeam is not null;
+
+    [Parameter]
+    public Guid SubjectId { get; set; }
+
+    [Parameter]
+    public EventCallback OnSuccess { get; set; }
+
+    private async Task<IEnumerable<GithubOrganization>> SearchOrganizations(
+        string query,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(query))
+            return Enumerable.Empty<GithubOrganization>();
+
+        return await GithubService.SearchOrganizationsAsync(query, cancellationToken);
+    }
+
+    private async Task<IEnumerable<GithubRepository>> SearchRepositories(
+        long organizationId,
+        string query,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(query))
+            return Enumerable.Empty<GithubRepository>();
+
+        return await GithubService.SearchRepositoriesAsync(organizationId, query, cancellationToken);
+    }
+
+    private async Task<IEnumerable<GithubTeam>> SearchTeams(long organizationId, string query, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(query))
+            return Enumerable.Empty<GithubTeam>();
+
+        return await GithubService.SearchTeamsAsync(organizationId, query, cancellationToken);
+    }
+
+    private void OnOrganizationChanged(GithubOrganization organization)
+    {
+        _organization = organization;
+        _templateRepository = null;
+        _mentorTeam = null;
+    }
+
+    private async Task OnCreateButtonClicked()
+    {
+        if (string.IsNullOrEmpty(_name)
+            || _workflow is null
+            || _organization is null
+            || _templateRepository is null
+            || _mentorTeam is null)
+        {
+            return;
+        }
+
+        var request = new CreateSubjectCourseRequest(
+            SubjectId,
+            _name,
+            _workflow.Value,
+            new GithubCreateSubjectCourseArgs(_organization.Id, _templateRepository.Id, _mentorTeam.Id));
+
+        var result = await SubjectCourseService.CreateAsync(request, default);
+
+        if (result is CreateSubjectCourseResult.Success)
+            await OnSuccess.InvokeAsync();
+    }
+
+}

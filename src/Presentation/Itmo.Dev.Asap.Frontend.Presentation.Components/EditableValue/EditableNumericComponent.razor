@@ -1,0 +1,20 @@
+@namespace Itmo.Dev.Asap.Frontend.Presentation.Components
+@typeparam T where T : System.Numerics.INumber<T>
+@inherits EditableValueComponent<T>
+
+@{
+    base.BuildRenderTree(__builder);
+}
+
+@code {
+
+    protected override RenderFragment RenderEditor()
+    {
+        return @<MudNumericField
+                    @bind-Value="@EditingValue"
+                    HideSpinButtons="true"
+                    MaxLength="5"
+                    Class="mud-typography-body2 disable-margin"/>;
+    }
+
+}

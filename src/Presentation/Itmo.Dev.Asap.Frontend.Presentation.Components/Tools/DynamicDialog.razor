@@ -1,0 +1,31 @@
+@namespace Itmo.Dev.Asap.Frontend.Presentation.Components
+@implements IAsyncDisposable
+
+<MudDialog DefaultFocus="DefaultFocus.Element">
+    <DialogContent>
+        @Fragment
+    </DialogContent>
+</MudDialog>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? Fragment { get; set; }
+
+    [Parameter]
+    public EventCallback OnOpened { get; set; }
+
+    [Parameter]
+    public EventCallback OnClosed { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await OnOpened.InvokeAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await OnClosed.InvokeAsync();
+    }
+
+}

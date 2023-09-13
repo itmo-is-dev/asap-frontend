@@ -1,0 +1,126 @@
+@namespace Itmo.Dev.Asap.Frontend.Presentation.Components
+@using System.Reactive.Subjects
+@typeparam T
+
+
+@if (IsEditing is not null)
+{
+    <PhazorReactiveValue Value="IsEditing" Context="editing">
+        @if (editing)
+        {
+            <MudSimpleTable
+                Elevation="0"
+                Outlined="false"
+                Dense="true"
+                Style="width: fit-content;">
+
+                <tbody>
+
+                <tr>
+                    <td style="min-width: @ValueWidth; max-width: @ValueWidth; padding-top: 0; padding-bottom: 0" class="@InputClass">
+                        @RenderEditor()
+                    </td>
+
+                    <td style="padding: 0 5px">
+                        <MudIconButton
+                            Icon="@Icons.Material.Outlined.Check"
+                            Disabled="@(!SubmitEnabled)"
+                            Size="Size.Small"
+                            Variant="Variant.Outlined"
+                            OnClick="@(() => OnValueSubmitted.InvokeAsync(EditingValue))"/>
+                    </td>
+
+                    <td style="padding: 0 5px">
+                        <MudIconButton
+                            Icon="@Icons.Material.Outlined.Close"
+                            Size="Size.Small"
+                            Variant="Variant.Outlined"
+                            OnClick="@(() => IsEditing.OnNext(false))"/>
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </MudSimpleTable>
+        }
+        else
+        {
+            <PhazorReactiveNullableValue Value="Value" Context="value">
+                <MudSimpleTable
+                    Elevation="0"
+                    Outlined="false"
+                    Dense="true"
+                    Style="width: fit-content;">
+
+                    <tbody>
+                    <tr>
+                        <td style="min-width: @ValueWidth; max-width: @ValueWidth; padding-top: 0; padding-bottom: 0" class="@InputClass">
+                            @if (value is not null)
+                            {
+                                @RenderValue(value)
+                            }
+                        </td>
+                        <td style="padding: 0 5px">
+                            <MudIconButton
+                                Icon="@Icons.Material.Filled.Edit"
+                                Size="Size.Small"
+                                Variant="Variant.Outlined"
+                                OnClick="@(() => OnEditingStarted(value))"/>
+                        </td>
+                    </tr>
+                    </tbody>
+
+                </MudSimpleTable>
+            </PhazorReactiveNullableValue>
+        }
+    </PhazorReactiveValue>
+}
+
+@code {
+
+    protected T? EditingValue;
+
+    [Parameter]
+    public ISubject<bool>? IsEditing { get; set; }
+
+    [Parameter]
+    public IObservable<T>? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<T> OnValueSubmitted { get; set; }
+
+    [Parameter]
+    public virtual string ValueWidth { get; set; } = "100px";
+
+    [Parameter]
+    public string? InputClass { get; set; }
+
+    protected virtual bool SubmitEnabled => true;
+
+    protected override void OnInitialized()
+    {
+        IsEditing?.OnNext(false);
+    }
+
+    protected virtual RenderFragment RenderValue(T value)
+    {
+        return @<div>@value</div>;
+    }
+
+    protected virtual RenderFragment RenderEditor()
+    {
+        return @<div></div>;
+    }
+
+    protected virtual void OnEditingValueChanged() { }
+
+    private void OnEditingStarted(T? value)
+    {
+        EditingValue = value;
+        OnEditingValueChanged();
+
+        IsEditing?.OnNext(true);
+    }
+
+}

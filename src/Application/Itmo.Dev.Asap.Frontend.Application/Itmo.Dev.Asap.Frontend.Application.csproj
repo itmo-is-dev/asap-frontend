@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+      <ProjectReference Include="..\Itmo.Dev.Asap.Frontend.Application.Abstractions\Itmo.Dev.Asap.Frontend.Application.Abstractions.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Phazor.Extensions" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+
+
+
+
+
+
+
+    </ItemGroup>
+
+
+
+
+</Project>

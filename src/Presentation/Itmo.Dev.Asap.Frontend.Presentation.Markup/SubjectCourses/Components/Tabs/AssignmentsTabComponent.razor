@@ -1,0 +1,16 @@
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Assignments.Components
+
+<ButtonTabComponent Label="Assignments">
+    <DialogContent Context="open">
+        <CreateAssignmentComponent
+            SubjectCourseId="SubjectCourseId"
+            OnSuccess="@(() => open.OnNext(false))"/>
+    </DialogContent>
+</ButtonTabComponent>
+
+@code {
+
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+}

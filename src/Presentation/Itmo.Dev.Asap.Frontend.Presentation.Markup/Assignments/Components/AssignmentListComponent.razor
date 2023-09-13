@@ -1,0 +1,62 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Assignments
+@using System.Reactive.Subjects
+@using System.Reflection
+@inject IAssignmentListProvider AssignmentListProvider
+@inject IJSRuntime Js
+@inject IDialogService DialogService
+
+@if (_assignmentList is not null)
+{
+    <MudList Clickable="true" Class="assignment-list">
+        <PhazorReactiveForEach Elements="_assignmentList.Values" Context="assignment">
+
+            <MudListItem
+                Value="assignment.Id"
+                OnClick="@(() => OnListItemClicked(assignment))"
+                OnClickHandlerPreventDefault="true">
+
+                <PhazorReactiveText Value="assignment.Name"/>
+
+            </MudListItem>
+
+        </PhazorReactiveForEach>
+    </MudList>
+}
+
+@code {
+
+    private static readonly DialogOptions DialogOptions = new DialogOptions
+    {
+        FullScreen = true,
+        CloseButton = true,
+        CloseOnEscapeKey = true,
+    };
+
+    private IAssignmentList? _assignmentList;
+
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SubjectCourseId.Equals(default))
+            return;
+
+        _assignmentList = await AssignmentListProvider.LoadAsync(SubjectCourseId, default);
+    }
+
+    private void OnListItemClicked(IAssignment assignment)
+    {
+        DialogService.ShowTemplated(
+            DialogOptions,
+            @<AssignmentComponent Assignment="assignment"/>,
+            onClosed: new EventCallback(this, OnDialogClosed));
+    }
+
+    private async Task OnDialogClosed()
+    {
+        Console.WriteLine("aboba");
+        await Js.InvokeVoidAsync("removeFocus", ".assignment-list .mud-list-item");
+    }
+
+}

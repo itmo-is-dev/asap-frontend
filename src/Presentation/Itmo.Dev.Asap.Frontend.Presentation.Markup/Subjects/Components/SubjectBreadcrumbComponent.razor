@@ -1,0 +1,47 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Subjects
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourses.Components
+@using System.Reactive.Linq
+@inject ISubjectProvider SubjectProvider
+
+@if (_subject is not null)
+{
+    <MudNavLink
+        Href="@($"/subjects/{SubjectId}")"
+        Style="width: fit-content">
+
+        <MudMenu
+            ActivationEvent="MouseEvent.MouseOver"
+            AnchorOrigin="Origin.BottomLeft"
+            TransformOrigin="Origin.TopLeft">
+
+            <ActivatorContent>
+                <MudText Typo="Typo.h5">
+                    <PhazorReactiveText Value="_subject.Name"/>
+                </MudText>
+            </ActivatorContent>
+
+            <ChildContent>
+                <SubjectCourseListComponent SubjectId="SubjectId"/>
+            </ChildContent>
+
+        </MudMenu>
+
+    </MudNavLink>
+}
+
+@code {
+
+    private ISubject? _subject;
+
+    [Parameter]
+    public Guid SubjectId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SubjectId.Equals(default))
+            return;
+
+        _subject = await SubjectProvider.LoadAsync(SubjectId, default);
+    }
+
+}

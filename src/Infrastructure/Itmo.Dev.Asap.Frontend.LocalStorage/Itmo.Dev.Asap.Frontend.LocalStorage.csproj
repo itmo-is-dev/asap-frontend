@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Blazored.LocalStorage" />
+      <PackageReference Include="Phazor.Extensions" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Application\Itmo.Dev.Asap.Frontend.Application.Abstractions\Itmo.Dev.Asap.Frontend.Application.Abstractions.csproj" />
+    </ItemGroup>
+
+
+
+
+</Project>

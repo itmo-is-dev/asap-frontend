@@ -1,0 +1,34 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Subjects
+@using Microsoft.Extensions.Logging
+@using Phazor.Components.Extensions
+@inject ISubjectList SubjectList
+@inject ILogger<SubjectListComponent> Logger
+@inject NavigationManager NavigationManager
+
+<MudList Clickable="true">
+    <PhazorReactiveForEach Elements="SubjectList.Values" Context="subject">
+
+        <MudListItem
+            Value="@subject.Id"
+            OnClick="@(() => OnItemClicked(subject.Id))">
+
+            <PhazorReactiveText Value="@subject.Name"/>
+
+        </MudListItem>
+
+    </PhazorReactiveForEach>
+</MudList>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SubjectList.ReloadAsync(default);
+    }
+
+    private void OnItemClicked(Guid subjectId)
+    {
+        NavigationManager.NavigateTo($"/subjects/{subjectId}");
+    }
+
+}

@@ -1,0 +1,29 @@
+@namespace Itmo.Dev.Asap.Frontend.Presentation.Components
+@using Microsoft.JSInterop
+@inject IJSRuntime Js
+
+@if (ChildContent is not null)
+{
+    @ChildContent
+}
+
+@code {
+
+    [Parameter]
+    public string? Selector { get; set; }
+    
+    [Parameter]
+    public string? Event { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Selector is null || Event is null)
+            return;
+
+        await Js.InvokeVoidAsync("stopEventPropagation", Selector, Event);
+    }
+
+}

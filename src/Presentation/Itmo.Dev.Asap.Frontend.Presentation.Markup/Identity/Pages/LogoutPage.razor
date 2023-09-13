@@ -1,0 +1,14 @@
+@page "/logout"
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity
+@inject IIdentityService IdentityService
+@inject NavigationManager NavigationManager
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        await IdentityService.LogoutAsync(default);
+        NavigationManager.NavigateTo("/", true);
+    }
+
+}

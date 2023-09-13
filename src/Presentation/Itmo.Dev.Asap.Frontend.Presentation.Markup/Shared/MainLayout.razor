@@ -1,0 +1,88 @@
+﻿@using Itmo.Dev.Asap.Frontend.Application.Events
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Notifications.Events
+@using System.Reactive.Disposables
+@using Phazor.Extensions
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject IEventProvider Provider
+@inject ISnackbar Snackbar
+
+<MudThemeProvider @bind-IsDarkMode="_isDarkMode" Theme="@AsapFrontendTheme.Instance"/>
+<MudDialogProvider CloseOnEscapeKey="true"/>
+<MudSnackbarProvider/>
+
+<CascadingValue Value="@(_isDarkMode ? AsapFrontendTheme.Instance.PaletteDark : AsapFrontendTheme.Instance.Palette)">
+    <MudLayout
+        Class="mud-height-full"
+        Style="@($"overflow:hidden; position:relative; background: {DrawerBackground};")">
+
+        <MudDrawerContainer Class="mud-height-full">
+
+            <MudDrawer
+                @bind-Open="_open"
+                Anchor="Anchor.Right"
+                Fixed="false"
+                Elevation="0"
+                Variant="@DrawerVariant.Mini"
+                OpenMiniOnHover="true">
+
+                <NavMenu/>
+
+            </MudDrawer>
+
+            <MudMainContent
+                Class="d-flex justify-start align-start mud-height-full hide-scroll-bar"
+                Style="@($"overflow-y: scroll; background: {Background}; border-top-right-radius: {ContentBorderRadius}; border-bottom-right-radius: {ContentBorderRadius}")">
+
+                <MudContainer Class="mt-6 mb-5" MaxWidth="MaxWidth.ExtraLarge">
+                    @Body
+                </MudContainer>
+
+            </MudMainContent>
+
+        </MudDrawerContainer>
+
+    </MudLayout>
+</CascadingValue>
+
+@code{
+
+    private bool _isDarkMode;
+
+    public string Background => _isDarkMode
+        ? AsapFrontendTheme.Instance.PaletteDark.Background.Value
+        : AsapFrontendTheme.Instance.Palette.Background.Value;
+
+    public string DrawerBackground => _isDarkMode
+        ? AsapFrontendTheme.Instance.PaletteDark.DrawerBackground.Value
+        : AsapFrontendTheme.Instance.Palette.DrawerBackground.Value;
+
+    private IDisposable _disposable = Disposable.Empty;
+
+    private bool _open;
+
+    private string ContentBorderRadius => _open ? "18px" : "0";
+
+    protected override void OnInitialized()
+    {
+        _disposable.Dispose();
+        _disposable = Disposable.Empty;
+
+        Provider
+            .Observe<ErrorOccured>()
+            .Subscribe(e => Snackbar.Add(e.Message, Severity.Error))
+            .CombineTo(ref _disposable);
+
+        Provider
+            .Observe<SuccessfulOperationOccured>()
+            .Subscribe(e => Snackbar.Add(e.Message, Severity.Success))
+            .CombineTo(ref _disposable);
+    }
+
+    public void Dispose()
+    {
+        _disposable.Dispose();
+    }
+
+}

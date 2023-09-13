@@ -1,0 +1,59 @@
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Subjects.Components
+@using System.Reactive.Subjects
+@page "/subjects"
+@inject IJSRuntime Js
+
+<MudStack Row="true" Justify="Justify.SpaceBetween" id="subject-list-header">
+
+    <MudText Typo="Typo.h2">
+        Subjects
+    </MudText>
+
+    <PhazorBinding T="bool" Context="open">
+
+        <MudButton OnClick="@(() => open.OnNext(true))">
+            Create
+        </MudButton>
+
+        <PhazorReactiveValue Value="open" Context="visible">
+
+            <MudDialog
+                IsVisible="visible"
+                Options="DialogOptions"
+                IsVisibleChanged="@(v => OnVisibleChanged(open, v))">
+
+                <DialogContent>
+                    <CreateSubjectComponent OnSuccess="@(() => open.OnNext(false))"/>
+                </DialogContent>
+
+            </MudDialog>
+
+        </PhazorReactiveValue>
+
+    </PhazorBinding>
+
+</MudStack>
+
+<SubjectListComponent/>
+
+<MudSpacer/>
+
+@code {
+
+    private static readonly DialogOptions DialogOptions = new DialogOptions
+    {
+        CloseButton = true,
+        CloseOnEscapeKey = true,
+    };
+
+    private async void OnVisibleChanged(ISubject<bool> subject, bool visible)
+    {
+        if (visible)
+            return;
+
+        subject.OnNext(false);
+
+        await Js.InvokeVoidAsync("removeFocus", "#subject-list-header > .mud-button");
+    }
+
+}

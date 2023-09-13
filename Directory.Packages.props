@@ -16,6 +16,7 @@
     <PackageVersion Include="Grpc.Core.Api" Version="2.55.0" />
     <PackageVersion Include="Grpc.Net.Client" Version="2.55.0" />
     <PackageVersion Include="Grpc.Tools" Version="2.56.2" />
+    <PackageVersion Include="Itmo.Dev.Asap.Gateway.Sdk" Version="1.0.39" />
     <PackageVersion Include="Itmo.Dev.Platform.Kafka" Version="1.0.38" />
     <PackageVersion Include="Itmo.Dev.Platform.Postgres" Version="1.0.38" />
     <PackageVersion Include="Itmo.Dev.Platform.Testing" Version="1.0.38" />
@@ -23,11 +24,14 @@
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="6.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="7.0.1" />
+    <PackageVersion Include="MudBlazor" Version="6.9.0" />
     <PackageVersion Include="Npgsql" Version="7.0.4" />
+    <PackageVersion Include="Phazor.Components" Version="1.1.37" />
+    <PackageVersion Include="Phazor.Extensions" Version="1.0.37" />
     <PackageVersion Include="Refit" Version="7.0.0" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="7.0.0" />
     <PackageVersion Include="Respawn" Version="6.0.0" />
-    <PackageVersion Include="Riok.Mapperly" Version="3.0.0" />
+    <PackageVersion Include="Riok.Mapperly" Version="3.1.0" />
     <PackageVersion Include="ronimizy.FluentSerialization" Version="1.2.0" />
     <PackageVersion Include="Sentry.AspNetCore" Version="3.33.0" />
     <PackageVersion Include="Sentry.Serilog" Version="3.33.0" />
@@ -35,7 +39,7 @@
     <PackageVersion Include="Testcontainers.PostgreSql" Version="3.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Blazored.LocalStorage" Version="4.3.0" />
+    <PackageVersion Include="Blazored.LocalStorage" Version="4.4.0" />
     <PackageVersion Include="Blazorise.Bootstrap" Version="1.2.2" />
     <PackageVersion Include="Blazorise.Components" Version="1.2.2" />
     <PackageVersion Include="Blazorise.Icons.FontAwesome" Version="1.2.2" />
@@ -69,11 +73,11 @@
   <ItemGroup>
     <PackageVersion Include="Microsoft.AspNetCore.Authorization" Version="7.0.5" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.10" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.5" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.5" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="7.0.5" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.5" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.8" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="7.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.10" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.10" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.8" />
@@ -136,7 +140,7 @@
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.435" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
-    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="6.10.0" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="6.32.3" />
     <PackageVersion Include="System.Reactive" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>

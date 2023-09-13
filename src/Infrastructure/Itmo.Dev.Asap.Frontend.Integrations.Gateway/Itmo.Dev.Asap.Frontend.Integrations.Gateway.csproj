@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+      <PackageReference Include="Itmo.Dev.Asap.Gateway.Sdk" />
+      <PackageReference Include="Phazor.Extensions" />
+      <PackageReference Include="Riok.Mapperly" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Application\Itmo.Dev.Asap.Frontend.Application.Abstractions\Itmo.Dev.Asap.Frontend.Application.Abstractions.csproj" />
+    </ItemGroup>
+
+
+
+</Project>
