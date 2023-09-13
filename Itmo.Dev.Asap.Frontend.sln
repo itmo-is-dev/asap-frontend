@@ -37,6 +37,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Frontend.Clie
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Frontend.Presentation.Components", "src\Presentation\Itmo.Dev.Asap.Frontend.Presentation.Components\Itmo.Dev.Asap.Frontend.Presentation.Components.csproj", "{5A5B0FFB-86E8-4918-B8ED-94935327D411}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{08411A95-E065-43CA-BA1B-3BFD38EB7CAB}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\deploy.yml = .github\workflows\deploy.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +61,7 @@ Global
 		{EA22675A-84A1-4ED2-B4C4-8D36516B8BA4} = {AD8E45F2-8C2F-4C41-B48F-8CBBE79E9C7E}
 		{BF992B70-6FDD-46B8-B859-A218F09ECB50} = {AD8E45F2-8C2F-4C41-B48F-8CBBE79E9C7E}
 		{5A5B0FFB-86E8-4918-B8ED-94935327D411} = {CFF879CA-0E03-4492-A6DA-27B34E38917E}
+		{08411A95-E065-43CA-BA1B-3BFD38EB7CAB} = {8AE3A20C-D313-4C83-8919-0A712F222012}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{FC88388B-AD24-4AF9-99FA-A43DC3038C6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

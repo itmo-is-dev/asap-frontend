@@ -6,10 +6,10 @@ namespace Itmo.Dev.Asap.Frontend.Presentation.Markup.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddMarkup(this IServiceCollection collection, bool isDevelopment)
+    public static IServiceCollection AddMarkup(this IServiceCollection collection, bool enablePhazorTracing)
     {
         collection.AddMudServices();
-        collection.AddPhazorComponents(x => x.Trace = isDevelopment);
+        collection.AddPhazorComponents(x => x.Trace = enablePhazorTracing);
 
         return collection;
     }

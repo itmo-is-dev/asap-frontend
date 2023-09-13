@@ -24,7 +24,7 @@ builder.Services
     .AddGatewayIntegration()
     .AddFrontendLocalStorage()
     .AddFrontendAuthentication()
-    .AddMarkup(builder.HostEnvironment.IsDevelopment());
+    .AddMarkup(builder.Configuration.GetSection("Phazor:Trace").Get<bool>());
 
 Type[] eagerDependencies = builder.Services
     .Where(x => x.Lifetime is ServiceLifetime.Singleton)
