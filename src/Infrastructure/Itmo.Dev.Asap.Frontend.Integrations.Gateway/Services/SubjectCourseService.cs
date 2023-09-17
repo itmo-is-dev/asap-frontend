@@ -6,7 +6,9 @@ using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses.Models;
 using Itmo.Dev.Asap.Frontend.Application.Events;
 using Itmo.Dev.Asap.Frontend.Integrations.Gateway.Mapping;
 using Itmo.Dev.Asap.Gateway.Application.Dto.SubjectCourses;
+using Itmo.Dev.Asap.Gateway.Presentation.Abstractions.Models;
 using Itmo.Dev.Asap.Gateway.Sdk.Clients;
+using Itmo.Dev.Asap.Gateway.Sdk.Extensions;
 using Refit;
 
 namespace Itmo.Dev.Asap.Frontend.Integrations.Gateway.Services;
@@ -36,7 +38,14 @@ internal class SubjectCourseService : ISubjectCourseService
             .GetCoursesAsync(subjectId, cancellationToken);
 
         if (response.IsSuccessStatusCode is false || response.Content is null)
+        {
+            ErrorDetails? details = await response.TryGetErrorDetailsAsync();
+
+            var errorEvent = new ErrorOccured(details?.Message ?? "Failed to subject courses");
+            _publisher.Publish(errorEvent);
+
             return;
+        }
 
         ISubjectCourse[] courses = response.Content
             .Select(x => _subjectCourseFactory.Create(x.Id))
@@ -61,7 +70,14 @@ internal class SubjectCourseService : ISubjectCourseService
             .GetByIdAsync(subjectCourseId, cancellationToken);
 
         if (response.IsSuccessStatusCode is false || response.Content is null)
+        {
+            ErrorDetails? details = await response.TryGetErrorDetailsAsync();
+
+            var errorEvent = new ErrorOccured(details?.Message ?? "Failed to load subject courses");
+            _publisher.Publish(errorEvent);
+
             return;
+        }
 
         SubjectCourseDto dto = response.Content;
 
@@ -100,7 +116,9 @@ internal class SubjectCourseService : ISubjectCourseService
 
         if (response.IsSuccessStatusCode is false || response.Content is null)
         {
-            var errorEvent = new ErrorOccured("Failed to create subject course");
+            ErrorDetails? details = await response.TryGetErrorDetailsAsync();
+
+            var errorEvent = new ErrorOccured(details?.Message ?? "Failed to create subject");
             _publisher.Publish(errorEvent);
 
             return new CreateSubjectCourseResult.Failure();
@@ -118,6 +136,9 @@ internal class SubjectCourseService : ISubjectCourseService
 
         var createdEvent = new SubjectCourseCreated(subjectCourse);
         _publisher.Publish(createdEvent);
+
+        var successEvent = new SuccessfulOperationOccured("Subject course created");
+        _publisher.Publish(successEvent);
 
         return new CreateSubjectCourseResult.Success();
     }
