@@ -41,7 +41,8 @@
 
                                 <MudIconButton
                                     Icon="@Icons.Material.Filled.Delete"
-                                    OnClick="@(() => OnRemoveStudentGroupClicked(group))"/>
+                                    OnClick="@(() => OnRemoveStudentGroupClicked(group))"
+                                    Style="padding: 0"/>
 
                             </MudStack>
                         </MudListItem>
@@ -74,31 +75,33 @@
                     T="string"
                     Immediate="true"
                     DebounceInterval="200"
-                    OnDebounceIntervalElapsed="OnSearchInputChanged"/>
+                    OnDebounceIntervalElapsed="OnSearchInputChanged"
+                    Style="max-height: 15%"/>
 
-                <MudList Clickable="false" Style="overflow: scroll;">
-                    @foreach (var item in FilterItems(_searchedStudentGroups))
-                    {
-                        <MudListItem>
-                            <MudStack
-                                Row="true"
-                                Justify="Justify.SpaceBetween"
-                                AlignItems="AlignItems.Center">
+                <MudStack Style="overflow: scroll; max-height: 85%">
+                    <MudList Clickable="false">
+                        @foreach (var item in FilterItems(_searchedStudentGroups))
+                        {
+                            <MudListItem>
+                                <MudStack
+                                    Row="true"
+                                    Justify="Justify.SpaceBetween"
+                                    AlignItems="AlignItems.Center">
 
-                                <MudText Typo="Typo.body1">
-                                    <PhazorReactiveText Value="item.Group.Name"/>
-                                </MudText>
+                                    <MudText Typo="Typo.body1">
+                                        <PhazorReactiveText Value="item.Group.Name"/>
+                                    </MudText>
 
-                                <MudIconButton
-                                    Icon="@Icons.Material.Filled.Add"
-                                    OnClick="@(() => OnAddStudentGroupClicked(item))"/>
+                                    <MudIconButton
+                                        Icon="@Icons.Material.Filled.Add"
+                                        OnClick="@(() => OnAddStudentGroupClicked(item))"
+                                        Style="padding: 0"/>
 
-                            </MudStack>
-                        </MudListItem>
-                    }
-                </MudList>
-
-                <MudSpacer/>
+                                </MudStack>
+                            </MudListItem>
+                        }
+                    </MudList>
+                </MudStack>
 
             </MudPaper>
 
@@ -155,7 +158,10 @@
     private async Task OnSearchInputChanged(string value)
     {
         IEnumerable<IStudentGroup> results = await SearchAsync(value, default);
-        _searchedStudentGroups = results.Select(x => new SubjectCourseGroupSearchItem(x)).ToHashSet();
+
+        _searchedStudentGroups = results
+            .Select(x => new SubjectCourseGroupSearchItem(x))
+            .ToHashSet();
     }
 
     private void OnAddStudentGroupClicked(SubjectCourseGroupSearchItem item)
@@ -187,7 +193,7 @@
 
         var query = new StudentGroupQueryModel(
             ExcludedIds: Array.Empty<Guid>(),
-            namePatterns, 
+            namePatterns,
             _subjectCourseIds);
 
         return await StudentGroupService.QueryGroupsAsync(query, cancellationToken);
