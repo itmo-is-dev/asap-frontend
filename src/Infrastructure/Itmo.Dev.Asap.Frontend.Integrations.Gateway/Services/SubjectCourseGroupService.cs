@@ -4,8 +4,10 @@ using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourseGroups.Events
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourseGroups.Models;
 using Itmo.Dev.Asap.Frontend.Application.Events;
 using Itmo.Dev.Asap.Gateway.Application.Dto.SubjectCourses;
+using Itmo.Dev.Asap.Gateway.Presentation.Abstractions.Models;
 using Itmo.Dev.Asap.Gateway.Presentation.Abstractions.Models.SubjectCourseGroups;
 using Itmo.Dev.Asap.Gateway.Sdk.Clients;
+using Itmo.Dev.Asap.Gateway.Sdk.Extensions;
 using Refit;
 
 namespace Itmo.Dev.Asap.Frontend.Integrations.Gateway.Services;
@@ -35,7 +37,14 @@ internal class SubjectCourseGroupService : ISubjectCourseGroupService
             .GetGroupsAsync(subjectCourseId, cancellationToken);
 
         if (response.IsSuccessStatusCode is false || response.Content is null)
+        {
+            ErrorDetails? details = await response.TryGetErrorDetailsAsync();
+
+            var errorEvent = new ErrorOccured(details?.Message ?? "Failed to load subject course groups");
+            _publisher.Publish(errorEvent);
+
             return;
+        }
 
         ISubjectCourseGroup[] groups = response.Content
             .Select(x => _factory.Create(x.SubjectCourseId, x.StudentGroupId))
@@ -60,7 +69,9 @@ internal class SubjectCourseGroupService : ISubjectCourseGroupService
 
         if (response.IsSuccessStatusCode is false || response.Content is null)
         {
-            var errorEvent = new ErrorOccured("Failed to add groups to subject course");
+            ErrorDetails? details = await response.TryGetErrorDetailsAsync();
+
+            var errorEvent = new ErrorOccured(details?.Message ?? "Failed to add groups to subject course");
             _publisher.Publish(errorEvent);
 
             return new CreateSubjectCourseGroupResult.Failure();
@@ -75,6 +86,9 @@ internal class SubjectCourseGroupService : ISubjectCourseGroupService
 
         var createdEvent = new SubjectCourseGroupsCreated(subjectCourseId, subjectCourseGroups);
         _publisher.Publish(createdEvent);
+
+        var successEvent = new SuccessfulOperationOccured("Added groups to subject course");
+        _publisher.Publish(successEvent);
 
         return new CreateSubjectCourseGroupResult.Success();
     }

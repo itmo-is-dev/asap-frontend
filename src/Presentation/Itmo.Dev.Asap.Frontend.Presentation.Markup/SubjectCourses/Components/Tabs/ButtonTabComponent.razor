@@ -20,7 +20,7 @@
             <PhazorReactiveValue Value="open" Context="visible">
                 <MudDialog
                     IsVisible="visible"
-                    Options="DialogOptions"
+                    Options="_dialogOptions"
                     IsVisibleChanged="@(v => OnVisibleChanged(open, v))"
                     ContentStyle="@DialogContentStyle">
 
@@ -46,11 +46,7 @@
 
     private string? _id;
 
-    private static readonly DialogOptions DialogOptions = new DialogOptions
-    {
-        CloseButton = true,
-        CloseOnEscapeKey = true,
-    };
+    private DialogOptions? _dialogOptions;
 
     [Parameter]
     public string? Label { get; set; }
@@ -61,9 +57,22 @@
     [Parameter]
     public string? DialogContentStyle { get; set; }
 
+    [Parameter]
+    public MaxWidth? MaxWidth { get; set; }
+
     protected override void OnInitialized()
     {
         _id = $"button-tab-component-{Guid.NewGuid()}";
+    }
+
+    protected override void OnParametersSet()
+    {
+        _dialogOptions = new DialogOptions
+        {
+            CloseButton = true,
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth,
+        };
     }
 
     private async void OnVisibleChanged(IObserver<bool> subject, bool visible)

@@ -8,39 +8,114 @@
 
 <MudStack
     Row="false"
-    Style="height: 100%; flex-grow: 1"
-    Justify="Justify.SpaceBetween">
+    Justify="Justify.SpaceBetween"
+    AlignItems="AlignItems.Center"
+    Style="flex-grow: 1; overflow: hidden">
 
-    <MudStack Row="false">
-        @foreach (var frame in _frames)
-        {
-            <StudentGroupFrameComponent
-                Frame="frame"
-                SearchFunc="SearchAsync"
-                OnFrameRemoved="RemoveFrame"
-                StateChanged="StateHasChanged"/>
-        }
+    <MudStack Row="true" Style="width: 100%; flex-grow: 1; overflow: hidden;">
 
-        @if (AddFrameButtonEnabled)
-        {
-            <MudButton
-                Variant="Variant.Outlined"
-                OnClick="@(() => _frames.Add(new StudentGroupFrame()))">
+        <MudStack
+            Row="false"
+            AlignItems="AlignItems.Start"
+            Spacing="0"
+            Style="overflow: hidden; width: 50%;">
 
-                Add another group
+            <MudText Typo="Typo.body2">
+                selected groups
+            </MudText>
 
-            </MudButton>
-        }
+            <MudPaper Elevation="0" Outlined="true" Style="overflow: hidden; flex-grow: 1; width: 100%">
+                <MudList Clickable="false" Style="overflow: scroll; width: 100%">
+
+                    @foreach (var group in _selectedStudentGroups)
+                    {
+                        <MudListItem>
+                            <MudStack
+                                Row="true"
+                                Justify="Justify.SpaceBetween"
+                                AlignItems="AlignItems.Center">
+
+                                <MudText Typo="Typo.body1">
+                                    <PhazorReactiveText Value="group.Name"/>
+                                </MudText>
+
+                                <MudIconButton
+                                    Icon="@Icons.Material.Filled.Delete"
+                                    OnClick="@(() => OnRemoveStudentGroupClicked(group))"/>
+
+                            </MudStack>
+                        </MudListItem>
+                    }
+
+                    <MudSpacer/>
+
+                </MudList>
+            </MudPaper>
+
+        </MudStack>
+
+        <MudStack
+            Row="false"
+            Justify="Justify.FlexStart"
+            Spacing="0"
+            Style="overflow: hidden; width: 50%;">
+
+            <MudText Typo="Typo.body2">
+                search groups
+            </MudText>
+
+            <MudPaper
+                Elevation="0"
+                Outlined="true"
+                Style="overflow: hidden; flex-grow: 1; width: 100%; padding: 10px">
+
+                <MudTextField
+                    Placeholder="group name"
+                    T="string"
+                    Immediate="true"
+                    DebounceInterval="200"
+                    OnDebounceIntervalElapsed="OnSearchInputChanged"/>
+
+                <MudList Clickable="false" Style="overflow: scroll;">
+                    @foreach (var item in FilterItems(_searchedStudentGroups))
+                    {
+                        <MudListItem>
+                            <MudStack
+                                Row="true"
+                                Justify="Justify.SpaceBetween"
+                                AlignItems="AlignItems.Center">
+
+                                <MudText Typo="Typo.body1">
+                                    <PhazorReactiveText Value="item.Group.Name"/>
+                                </MudText>
+
+                                <MudIconButton
+                                    Icon="@Icons.Material.Filled.Add"
+                                    OnClick="@(() => OnAddStudentGroupClicked(item))"/>
+
+                            </MudStack>
+                        </MudListItem>
+                    }
+                </MudList>
+
+                <MudSpacer/>
+
+            </MudPaper>
+
+        </MudStack>
+
     </MudStack>
 
-    <MudButton
-        Variant="Variant.Outlined"
-        Disabled="@(!AddGroupsButtonEnabled)"
-        OnClick="@OnAddGroupsClickAsync">
+    <MudStack Row="true" Justify="Justify.FlexEnd" Style="width: 100%">
+        <MudButton
+            Variant="Variant.Outlined"
+            Disabled="@(!AddGroupsButtonEnabled)"
+            OnClick="@OnAddGroupsClickAsync">
 
-        Add groups
+            Add groups
 
-    </MudButton>
+        </MudButton>
+    </MudStack>
 
 </MudStack>
 
@@ -48,11 +123,10 @@
 
     private IEnumerable<Guid> _subjectCourseIds = Enumerable.Empty<Guid>();
 
-    private readonly List<StudentGroupFrame> _frames = new List<StudentGroupFrame>();
+    private ICollection<IStudentGroup> _selectedStudentGroups = new List<IStudentGroup>();
+    private ICollection<SubjectCourseGroupSearchItem> _searchedStudentGroups = new List<SubjectCourseGroupSearchItem>();
 
-    private bool AddFrameButtonEnabled => _frames.All(x => x.StudentGroup is not null);
-
-    private bool AddGroupsButtonEnabled => _frames is not [] && _frames.All(x => x.StudentGroup is not null);
+    private bool AddGroupsButtonEnabled => _selectedStudentGroups.Any();
 
     [Parameter]
     public Guid SubjectCourseId { get; set; }
@@ -67,16 +141,38 @@
             SubjectCourseId,
         };
 
-        _frames.Clear();
-        _frames.Add(new StudentGroupFrame());
+        _selectedStudentGroups.Clear();
+        _searchedStudentGroups.Clear();
     }
 
-    private void RemoveFrame(StudentGroupFrame frame)
+    private IEnumerable<SubjectCourseGroupSearchItem> FilterItems(IEnumerable<SubjectCourseGroupSearchItem> items)
     {
-        _frames.Remove(frame);
+        return items
+            .Where(x => x.Visible)
+            .Where(x => _selectedStudentGroups.Contains(x.Group) is false);
+    }
 
-        if (_frames is [])
-            _frames.Add(new StudentGroupFrame());
+    private async Task OnSearchInputChanged(string value)
+    {
+        IEnumerable<IStudentGroup> results = await SearchAsync(value, default);
+        _searchedStudentGroups = results.Select(x => new SubjectCourseGroupSearchItem(x)).ToHashSet();
+    }
+
+    private void OnAddStudentGroupClicked(SubjectCourseGroupSearchItem item)
+    {
+        item.Visible = false;
+        _selectedStudentGroups.Add(item.Group);
+    }
+
+    private void OnRemoveStudentGroupClicked(IStudentGroup group)
+    {
+        _selectedStudentGroups.Remove(group);
+
+        SubjectCourseGroupSearchItem? item = _searchedStudentGroups
+            .SingleOrDefault(x => x.Group.Equals(group));
+
+        if (item is not null)
+            item.Visible = true;
     }
 
     private async Task<IEnumerable<IStudentGroup>> SearchAsync(string q, CancellationToken cancellationToken)
@@ -84,25 +180,23 @@
         if (string.IsNullOrEmpty(q))
             return Enumerable.Empty<IStudentGroup>();
 
-        IEnumerable<Guid> excludedIds = _frames
-            .Where(x => x.StudentGroup is not null)
-            .Select(x => x.StudentGroup!.Id);
-
         var namePatterns = new[]
         {
             q,
         };
 
-        var query = new StudentGroupQueryModel(excludedIds, namePatterns, _subjectCourseIds);
+        var query = new StudentGroupQueryModel(
+            ExcludedIds: Array.Empty<Guid>(),
+            namePatterns, 
+            _subjectCourseIds);
 
         return await StudentGroupService.QueryGroupsAsync(query, cancellationToken);
     }
 
     private async Task OnAddGroupsClickAsync()
     {
-        IEnumerable<Guid> groupIds = _frames
-            .Where(x => x.StudentGroup is not null)
-            .Select(x => x.StudentGroup!.Id);
+        IEnumerable<Guid> groupIds = _selectedStudentGroups
+            .Select(x => x.Id);
 
         var result = await SubjectCourseGroupService.CreateAsync(SubjectCourseId, groupIds, default);
 
