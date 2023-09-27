@@ -41,7 +41,11 @@ internal class IdentityService : IIdentityService
             Console.WriteLine($"Login response code: {response.StatusCode}");
 
             if (response.IsSuccessStatusCode is false || response.Content is null)
-                return new LoginResult.Failure(response.ReasonPhrase ?? string.Empty);
+            {
+                ErrorDetails? error = await response.TryGetErrorDetailsAsync();
+
+                return new LoginResult.Failure(error?.Message ?? string.Empty);
+            }
 
             var evt = new TokenUpdated(response.Content.Token);
             _publisher.Publish(evt);
