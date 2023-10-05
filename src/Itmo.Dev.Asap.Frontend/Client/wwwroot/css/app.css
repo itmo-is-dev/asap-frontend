@@ -85,3 +85,7 @@ html, body {
 .mud-link-underline-hover:hover {
     color: var(--mud-palette-secondary) !important;
 }
+
+.mud-dialog-fullscreen {
+    overflow-y: scroll !important;
+}
