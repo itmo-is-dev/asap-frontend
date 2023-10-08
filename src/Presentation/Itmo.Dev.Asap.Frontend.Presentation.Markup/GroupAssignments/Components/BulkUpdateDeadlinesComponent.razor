@@ -45,7 +45,7 @@
             AlignItems="AlignItems.Center"
             Style="flex-grow: 1; overflow: hidden">
 
-            <MudDatePicker Date="_deadline"></MudDatePicker>
+            <MudDatePicker @bind-Date="_deadline"/>
 
             <MudStack Row="true" Justify="Justify.FlexEnd" Style="width: 100%">
                 <MudButton
@@ -71,7 +71,7 @@
     private static readonly Transition Transition = Transition.Slide;
 
     private readonly ICollection<IStudentGroup> _selectedStudentGroups = new List<IStudentGroup>();
-    private DateTime _deadline;
+    private DateTime? _deadline;
 
     private MudCarousel<object>? _carousel;
     private bool _updating;
@@ -104,11 +104,14 @@
 
     private async Task OnUpdateButtonClicked()
     {
+        if (_deadline is null)
+            return;
+        
         _updating = true;
 
         var result = await GroupAssignmentService.UpdateDeadlinesAsync(
             AssignmentId,
-            _deadline,
+            _deadline.Value,
             _selectedStudentGroups.Select(x => x.Id),
             default);
 
