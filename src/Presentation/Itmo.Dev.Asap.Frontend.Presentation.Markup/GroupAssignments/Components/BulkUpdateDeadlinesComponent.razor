@@ -1,0 +1,121 @@
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.StudentGroups.Components
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.StudentGroups
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.GroupAssignments
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.GroupAssignments.Models
+@inject IGroupAssignmentService GroupAssignmentService
+
+<MudCarousel TData="object"
+             @ref="_carousel"
+             ShowArrows="false"
+             ShowBullets="false"
+             EnableSwipeGesture="false"
+             AutoCycle="false"
+             Class="mud-width-full">
+
+    <MudCarouselItem Transition="Transition" Style="display: flex">
+        <MudStack
+            Row="false"
+            Justify="Justify.SpaceBetween"
+            AlignItems="AlignItems.Center"
+            Style="flex-grow: 1; overflow: hidden">
+
+            <SelectStudentGroupComponent
+                SubjectCourseId="SubjectCourseId"
+                SelectedStudentGroups="_selectedStudentGroups"
+                OnSelectedGroupsChanged="StateHasChanged"/>
+
+            <MudStack Row="true" Justify="Justify.FlexEnd" Style="width: 100%">
+                <MudButton
+                    Variant="Variant.Outlined"
+                    Disabled="@(!NextButtonEnabled)"
+                    OnClick="@OnNextButtonClicked">
+
+                    Next
+
+                </MudButton>
+            </MudStack>
+
+        </MudStack>
+    </MudCarouselItem>
+
+    <MudCarouselItem Transition="Transition" Style="display: flex">
+        <MudStack
+            Row="false"
+            Justify="Justify.SpaceBetween"
+            AlignItems="AlignItems.Center"
+            Style="flex-grow: 1; overflow: hidden">
+
+            <MudDatePicker Date="_deadline"></MudDatePicker>
+
+            <MudStack Row="true" Justify="Justify.FlexEnd" Style="width: 100%">
+                <MudButton
+                    Variant="Variant.Outlined"
+                    Disabled="@(!UpdateButtonEnabled)"
+                    OnClick="@OnUpdateButtonClicked">
+
+                    Update
+
+                </MudButton>
+            </MudStack>
+
+        </MudStack>
+    </MudCarouselItem>
+
+</MudCarousel>
+
+@code {
+
+        private const int GroupSelectorIndex = 0;
+        private const int DeadlineSelectorIndex = 1;
+
+    private static readonly Transition Transition = Transition.Slide;
+
+    private readonly ICollection<IStudentGroup> _selectedStudentGroups = new List<IStudentGroup>();
+    private DateTime _deadline;
+
+    private MudCarousel<object>? _carousel;
+    private bool _updating;
+
+    private bool NextButtonEnabled => _selectedStudentGroups.Any();
+
+    private bool UpdateButtonEnabled => _updating is false;
+
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+    [Parameter]
+    public Guid AssignmentId { get; set; }
+
+    [Parameter]
+    public EventCallback OnSuccess { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _deadline = DateTime.Now;
+    }
+
+    private void OnNextButtonClicked()
+    {
+        if (_carousel is null)
+            return;
+
+        _carousel.SelectedIndex = DeadlineSelectorIndex;
+    }
+
+    private async Task OnUpdateButtonClicked()
+    {
+        _updating = true;
+
+        var result = await GroupAssignmentService.UpdateDeadlinesAsync(
+            AssignmentId,
+            _deadline,
+            _selectedStudentGroups.Select(x => x.Id),
+            default);
+
+        _updating = false;
+
+        if (result is UpdateDeadlineResult.Success)
+            await OnSuccess.InvokeAsync();
+    }
+
+}

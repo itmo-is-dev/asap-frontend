@@ -3,12 +3,27 @@
 @using Itmo.Dev.Asap.Frontend.Presentation.Markup.GroupAssignments.Components
 
 @inject IAssignmentService AssignmentService
+@inject IDialogService DialogService
 
 @if (Assignment is not null)
 {
-    <MudText Typo="Typo.h4">
-        <PhazorReactiveText Value="Assignment.Name"/>
-    </MudText>
+    <MudStack Row="true" AlignItems="AlignItems.Center">
+
+        <MudText Typo="Typo.h4">
+            <PhazorReactiveText Value="Assignment.Name"/>
+        </MudText>
+
+        <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+
+            <PhazorReactiveValue Value="Assignment.SubjectCourseId" Context="subjectCourseId">
+                <MudMenuItem OnClick="@(() => OnUpdateBulkDeadlinesClicked(subjectCourseId))">
+                    Bulk update deadlines
+                </MudMenuItem>
+            </PhazorReactiveValue>
+
+        </MudMenu>
+
+    </MudStack>
 
     <MudSimpleTable
         Elevation="0"
@@ -61,6 +76,14 @@
 
 @code {
 
+    private static readonly DialogOptions MoreActionsDialogOptions = new DialogOptions
+    {
+        CloseButton = true,
+        CloseOnEscapeKey = true,
+        FullScreen = false,
+        MaxWidth = MaxWidth.Large,
+    };
+
     [Parameter]
     public IAssignment? Assignment { get; set; }
 
@@ -84,6 +107,22 @@
         var result = await AssignmentService.UpdateMaxPointsAsync(Assignment.Id, value, default);
 
         return result is not UpdateMaxPointsResult.Success;
+    }
+
+    private async Task OnUpdateBulkDeadlinesClicked(Guid subjectCourseId)
+    {
+        const string contentStyle = "min-width: 800px; max-width: 1000px; min-height: 500px; max-height: 500px; display: flex";
+
+        if (Assignment is null)
+            return;
+
+        var tcs = new TaskCompletionSource();
+
+        await DialogService.ShowTemplatedWithClosingAsync(
+            MoreActionsDialogOptions,
+            tcs.Task,
+            contentStyle: contentStyle,
+            fragment: @<BulkUpdateDeadlinesComponent SubjectCourseId="subjectCourseId" AssignmentId="Assignment.Id" OnSuccess="@(() => tcs.SetResult())"/>);
     }
 
 }

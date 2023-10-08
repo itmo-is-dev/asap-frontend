@@ -2,6 +2,7 @@
 @using Itmo.Dev.Asap.Frontend.Application.Abstractions.Students
 @using Itmo.Dev.Asap.Frontend.Application.Abstractions.Students.Models
 @using System.Reactive.Linq
+@using System.Reflection.Metadata
 @using Itmo.Dev.Asap.Frontend.Application.Abstractions.StudentGroups
 @using Itmo.Dev.Asap.Frontend.Application.Abstractions.StudentGroups.Models
 @inject IStudentService StudentService
@@ -186,7 +187,7 @@
 
         var query = new StudentGroupQueryModel(
             Enumerable.Empty<Guid>(),
-            names,
+            names, Enumerable.Empty<Guid>(),
             Enumerable.Empty<Guid>());
 
         return await StudentGroupService.QueryGroupsAsync(query, cancellationToken);

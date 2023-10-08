@@ -1,10 +1,10 @@
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.StudentGroups;
 
-namespace Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourseGroups.Models;
+namespace Itmo.Dev.Asap.Frontend.Presentation.Markup.StudentGroups.Models;
 
-public class SubjectCourseGroupSearchItem
+public class StudentGroupSearchItem
 {
-    public SubjectCourseGroupSearchItem(IStudentGroup group)
+    public StudentGroupSearchItem(IStudentGroup group)
     {
         Group = group;
         Visible = true;
