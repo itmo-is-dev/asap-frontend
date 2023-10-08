@@ -88,7 +88,9 @@ internal class GroupAssignmentService : IGroupAssignmentService
         IEnumerable<Guid> studentGroupIds,
         CancellationToken cancellationToken)
     {
-        var request = new UpdateGroupAssignmentDeadlinesRequest(deadline, studentGroupIds);
+        var request = new UpdateGroupAssignmentDeadlinesRequest(
+            DateTime.SpecifyKind(deadline, DateTimeKind.Utc),
+            studentGroupIds);
 
         IApiResponse<IReadOnlyCollection<GroupAssignmentDto>> response = await _assignmentClient
             .UpdateGroupAssignmentDeadlinesAsync(assignmentId, request, cancellationToken);
