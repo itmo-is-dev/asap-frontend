@@ -1,0 +1,200 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.StudentGroups
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.StudentGroups.Models
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.StudentGroups.Models
+@inject IStudentGroupService StudentGroupService
+
+@if (SelectedStudentGroups is not null)
+{
+    <MudStack Row="true" Style="width: 100%; flex-grow: 1; overflow: hidden;">
+
+        <MudStack
+            Row="false"
+            AlignItems="AlignItems.Start"
+            Spacing="0"
+            Style="overflow: hidden; width: 50%;">
+
+            <MudText Typo="Typo.body2">
+                selected groups
+            </MudText>
+
+            <MudPaper Elevation="0" Outlined="true" Style="overflow: hidden; flex-grow: 1; width: 100%">
+                <MudList Clickable="false" Style="overflow: scroll; width: 100%">
+
+                    @foreach (var group in SelectedStudentGroups)
+                    {
+                        <MudListItem>
+                            <MudStack
+                                Row="true"
+                                Justify="Justify.SpaceBetween"
+                                AlignItems="AlignItems.Center">
+
+                                <MudText Typo="Typo.body1">
+                                    <PhazorReactiveText Value="group.Name"/>
+                                </MudText>
+
+                                <MudIconButton
+                                    Icon="@Icons.Material.Filled.Delete"
+                                    OnClick="@(() => OnRemoveStudentGroupClicked(group))"
+                                    Style="padding: 0"/>
+
+                            </MudStack>
+                        </MudListItem>
+                    }
+
+                    <MudSpacer/>
+
+                </MudList>
+            </MudPaper>
+
+        </MudStack>
+
+        <MudStack
+            Row="false"
+            Justify="Justify.FlexStart"
+            Spacing="0"
+            Style="overflow: hidden; width: 50%;">
+
+            <MudText Typo="Typo.body2">
+                search groups
+            </MudText>
+
+            <MudPaper
+                Elevation="0"
+                Outlined="true"
+                Style="overflow: hidden; flex-grow: 1; width: 100%; padding: 10px">
+
+                <MudTextField
+                    Placeholder="group name"
+                    T="string"
+                    Immediate="true"
+                    DebounceInterval="200"
+                    OnDebounceIntervalElapsed="OnSearchInputChanged"
+                    Style="max-height: 15%"/>
+
+                <MudStack Style="overflow: scroll; max-height: 85%">
+                    <MudList Clickable="false">
+                        @foreach (var item in FilterItems(_searchedStudentGroups))
+                        {
+                            <MudListItem>
+                                <MudStack
+                                    Row="true"
+                                    Justify="Justify.SpaceBetween"
+                                    AlignItems="AlignItems.Center">
+
+                                    <MudText Typo="Typo.body1">
+                                        <PhazorReactiveText Value="item.Group.Name"/>
+                                    </MudText>
+
+                                    <MudIconButton
+                                        Icon="@Icons.Material.Filled.Add"
+                                        OnClick="@(() => OnAddStudentGroupClicked(item))"
+                                        Style="padding: 0"/>
+
+                                </MudStack>
+                            </MudListItem>
+                        }
+                    </MudList>
+                </MudStack>
+
+            </MudPaper>
+
+        </MudStack>
+
+    </MudStack>
+}
+
+@code {
+    private IEnumerable<Guid> _subjectCourseIds = Enumerable.Empty<Guid>();
+    private IEnumerable<Guid> _excludedSubjectCourseIds = Enumerable.Empty<Guid>();
+
+    private ICollection<StudentGroupSearchItem> _searchedStudentGroups = new List<StudentGroupSearchItem>();
+
+    [Parameter]
+    public Guid? SubjectCourseId { get; set; }
+
+    [Parameter]
+    public Guid? ExcludedSubjectCourseId { get; set; }
+
+    [Parameter]
+    public ICollection<IStudentGroup>? SelectedStudentGroups { get; set; }
+
+    [Parameter]
+    public EventCallback OnSelectedGroupsChanged { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _subjectCourseIds = SubjectCourseId is null ? Array.Empty<Guid>() : new[]
+        {
+            SubjectCourseId.Value,
+        };
+        
+        _excludedSubjectCourseIds = ExcludedSubjectCourseId is null ? Array.Empty<Guid>() : new[]
+        {
+            ExcludedSubjectCourseId.Value,
+        };
+    }
+
+    protected override void OnInitialized()
+    {
+        _searchedStudentGroups.Clear();
+    }
+
+    private IEnumerable<StudentGroupSearchItem> FilterItems(IEnumerable<StudentGroupSearchItem> items)
+    {
+        if (SelectedStudentGroups is null)
+            return Enumerable.Empty<StudentGroupSearchItem>();
+
+        return items
+            .Where(x => x.Visible)
+            .Where(x => SelectedStudentGroups.Contains(x.Group) is false);
+    }
+
+    private async Task OnSearchInputChanged(string value)
+    {
+        IEnumerable<IStudentGroup> results = await SearchAsync(value, default);
+
+        _searchedStudentGroups = results
+            .Select(x => new StudentGroupSearchItem(x))
+            .ToHashSet();
+    }
+
+    private async Task OnAddStudentGroupClicked(StudentGroupSearchItem item)
+    {
+        item.Visible = false;
+        SelectedStudentGroups?.Add(item.Group);
+
+        await OnSelectedGroupsChanged.InvokeAsync();
+    }
+
+    private async Task OnRemoveStudentGroupClicked(IStudentGroup group)
+    {
+        SelectedStudentGroups?.Remove(group);
+        await OnSelectedGroupsChanged.InvokeAsync();
+
+        var item = _searchedStudentGroups
+            .SingleOrDefault(x => x.Group.Equals(group));
+
+        if (item is not null)
+            item.Visible = true;
+    }
+
+    private async Task<IEnumerable<IStudentGroup>> SearchAsync(string q, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(q))
+            return Enumerable.Empty<IStudentGroup>();
+
+        var namePatterns = new[]
+        {
+            q,
+        };
+
+        var query = new StudentGroupQueryModel(
+            ExcludedIds: Array.Empty<Guid>(),
+            namePatterns,
+            _subjectCourseIds,
+            _excludedSubjectCourseIds);
+
+        return await StudentGroupService.QueryGroupsAsync(query, cancellationToken);
+    }
+
+}

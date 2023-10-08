@@ -55,7 +55,7 @@ internal class GroupAssignmentService : IGroupAssignmentService
     {
         var request = new UpdateGroupAssignmentRequest(deadline);
 
-        IApiResponse<GroupAssignmentDto> response = await _assignmentClient.UpdateGroupAssignment(
+        IApiResponse<GroupAssignmentDto> response = await _assignmentClient.UpdateGroupAssignmentAsync(
             assignmentId,
             studentGroupId,
             request,
@@ -78,6 +78,35 @@ internal class GroupAssignmentService : IGroupAssignmentService
             response.Content.Deadline);
 
         _publisher.Publish(updatedEvent);
+
+        return new UpdateDeadlineResult.Success();
+    }
+
+    public async ValueTask<UpdateDeadlineResult> UpdateDeadlinesAsync(
+        Guid assignmentId,
+        DateTime deadline,
+        IEnumerable<Guid> studentGroupIds,
+        CancellationToken cancellationToken)
+    {
+        var request = new UpdateGroupAssignmentDeadlinesRequest(deadline, studentGroupIds);
+
+        IApiResponse<IReadOnlyCollection<GroupAssignmentDto>> response = await _assignmentClient
+            .UpdateGroupAssignmentDeadlinesAsync(assignmentId, request, cancellationToken);
+
+        if (response.IsSuccessStatusCode is false || response.Content is null)
+        {
+            ErrorDetails? details = await response.TryGetErrorDetailsAsync();
+
+            var errorEvent = new ErrorOccured(details?.Message ?? "Failed to update deadline");
+            _publisher.Publish(errorEvent);
+
+            return new UpdateDeadlineResult.Failure();
+        }
+
+        IEnumerable<GroupAssignmentUpdated> updatedEvents = response.Content
+            .Select(x => new GroupAssignmentUpdated(x.AssignmentId, x.GroupId, x.GroupName, x.Deadline));
+
+        _publisher.Publish(updatedEvents);
 
         return new UpdateDeadlineResult.Success();
     }

@@ -11,4 +11,10 @@ public interface IGroupAssignmentService
         Guid studentGroupId,
         DateTime deadline,
         CancellationToken cancellationToken);
+
+    ValueTask<UpdateDeadlineResult> UpdateDeadlinesAsync(
+        Guid assignmentId,
+        DateTime deadline,
+        IEnumerable<Guid> studentGroupIds,
+        CancellationToken cancellationToken);
 }

@@ -31,6 +31,7 @@ internal class StudentGroupService : IStudentGroupService
             100,
             query.ExcludedIds,
             query.NamePatterns,
+            query.SubjectCourseIds,
             query.ExcludedSubjectCourseIds);
 
         var studentGroups = new List<IStudentGroup>();

@@ -26,11 +26,13 @@ public static class DialogServiceExtensions
         this IDialogService service,
         DialogOptions options,
         Task closing,
-        RenderFragment fragment)
+        RenderFragment fragment,
+        string? contentStyle = null)
     {
         var parameters = new DialogParameters<DynamicDialog>
         {
             { x => x.Fragment, fragment },
+            { x => x.DialogContentStyle, contentStyle },
         };
 
         IDialogReference reference = await service.ShowAsync<DynamicDialog>(string.Empty, parameters, options);
