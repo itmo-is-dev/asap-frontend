@@ -149,6 +149,33 @@ internal class AssignmentService : IAssignmentService
         return new UpdateMaxPointsResult.Success();
     }
 
+    public async ValueTask<IEnumerable<AssignmentInfo>> QueryAsync(
+        Guid subjectCourseId,
+        IEnumerable<string> names,
+        CancellationToken cancellationToken)
+    {
+        var request = new QueryAssignmentsRequest(
+            Ids: Array.Empty<Guid>(),
+            Names: names,
+            SubjectCourseIds: new[] { subjectCourseId });
+
+        IApiResponse<IEnumerable<AssignmentDto>> response = await _assignmentClient
+            .QueryAsync(request, cancellationToken);
+
+        if (response.IsSuccessStatusCode is false || response.Content is null)
+        {
+            ErrorDetails? details = await response.TryGetErrorDetailsAsync();
+
+            var errorEvent = new ErrorOccured(details?.Message ?? "Failed to query assignments");
+            _publisher.Publish(errorEvent);
+
+            return Enumerable.Empty<AssignmentInfo>();
+        }
+
+        return response.Content
+            .Select(assignment => new AssignmentInfo(assignment.Id, assignment.Title, assignment.ShortName));
+    }
+
     private static AssignmentUpdated ToEvent(AssignmentDto dto)
     {
         return new AssignmentUpdated(dto.Id, dto.SubjectCourseId, dto.Title, dto.MinPoints, dto.MaxPoints);

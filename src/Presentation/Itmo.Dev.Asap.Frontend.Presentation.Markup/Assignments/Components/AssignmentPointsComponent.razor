@@ -1,0 +1,79 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Assignments
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Assignments.Models
+@inject IAssignmentService AssignmentService
+
+@if (Assignment is not null)
+{
+    <MudSimpleTable
+        Elevation="0"
+        Outlined="false"
+        Dense="true"
+        Style="width: fit-content;">
+
+        <tbody>
+
+        <tr>
+            <td style="border-bottom: none">
+                Min points:
+            </td>
+
+            <td style="border-bottom: none">
+                <PhazorBinding T="bool" ReplaySize="1" Context="editing">
+                    <EditableNumericComponent
+                        T="double"
+                        IsEditing="editing"
+                        Value="Assignment.MinPoints"
+                        OnValueSubmitted="@(async v => editing.OnNext(await OnMinPointsSubmitted(v)))"/>
+                </PhazorBinding>
+            </td>
+        </tr>
+
+        <tr>
+
+            <td>Max points:</td>
+
+            <td>
+                <PhazorBinding T="bool" ReplaySize="1" Context="editing">
+                    <EditableNumericComponent
+                        T="double"
+                        IsEditing="editing"
+                        Value="Assignment.MaxPoints"
+                        OnValueSubmitted="@(async v => editing.OnNext(await OnMaxPointsSubmitted(v)))"/>
+                </PhazorBinding>
+            </td>
+
+        </tr>
+
+        </tbody>
+
+    </MudSimpleTable>
+}
+
+@code {
+
+    [Parameter]
+    public IAssignment? Assignment { get; set; }
+
+    // Returns IsEditing state
+    private async ValueTask<bool> OnMinPointsSubmitted(double value)
+    {
+        if (Assignment is null)
+            return false;
+
+        var result = await AssignmentService.UpdateMinPointsAsync(Assignment.Id, value, default);
+
+        return result is not UpdateMinPointsResult.Success;
+    }
+
+    // Returns IsEditing state
+    private async ValueTask<bool> OnMaxPointsSubmitted(double value)
+    {
+        if (Assignment is null)
+            return false;
+
+        var result = await AssignmentService.UpdateMaxPointsAsync(Assignment.Id, value, default);
+
+        return result is not UpdateMaxPointsResult.Success;
+    }
+
+}

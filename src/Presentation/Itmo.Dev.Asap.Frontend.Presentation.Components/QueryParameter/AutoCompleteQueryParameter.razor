@@ -1,0 +1,58 @@
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.QueryParameter.Parameters
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.Parameters
+@namespace Itmo.Dev.Asap.Frontend.Presentation.Components
+@typeparam T
+
+<ParameterComponent
+    @ref="_component"
+    Label="@Label"
+    PreviewWidth="@PreviewWidth"
+    ToStringFunc="@ToStringFunc"
+    ValuesChanged="ValuesChanged">
+
+    <ValueInput>
+        <MudAutocomplete
+            T="T"
+            @ref="_autocomplete"
+            SearchFuncWithCancel="SearchFunc"
+            ValueChanged="@(x => OnValueChanged(context.ParameterController, x))"
+            DebounceInterval="1000"
+            ShowProgressIndicator="true"
+            ToStringFunc="context.ParameterController.ConvertValueToString"/>
+    </ValueInput>
+
+</ParameterComponent>
+
+@code {
+
+    private MudAutocomplete<T>? _autocomplete;
+
+    private ParameterComponent<T>? _component;
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public string? PreviewWidth { get; set; }
+
+    [Parameter]
+    public Func<string, CancellationToken, Task<IEnumerable<T>>>? SearchFunc { get; set; }
+
+    [Parameter]
+    public Func<T, string>? ToStringFunc { get; set; }
+
+    [Parameter]
+    public EventCallback ValuesChanged { get; set; }
+
+    public IEnumerable<T> Values => _component?.Values.Select(x => x.Value) ?? Enumerable.Empty<T>();
+
+    private async Task OnValueChanged(IParameterController<T> controller, T value)
+    {
+        controller.AddValue(new QueryValue<T>(value));
+        await controller.OnValuesChangedAsync();
+
+        if (_autocomplete is not null)
+            await _autocomplete.Clear();
+    }
+
+}

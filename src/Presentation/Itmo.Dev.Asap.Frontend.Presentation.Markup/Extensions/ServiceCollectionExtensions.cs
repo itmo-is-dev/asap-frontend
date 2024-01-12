@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using MudBlazor;
 using MudBlazor.Services;
 using Phazor.Components.Extensions;
 
@@ -9,6 +10,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMarkup(this IServiceCollection collection, bool enablePhazorTracing)
     {
         collection.AddMudServices();
+        collection.AddMudMarkdownServices();
         collection.AddPhazorComponents(x => x.Trace = enablePhazorTracing);
 
         return collection;

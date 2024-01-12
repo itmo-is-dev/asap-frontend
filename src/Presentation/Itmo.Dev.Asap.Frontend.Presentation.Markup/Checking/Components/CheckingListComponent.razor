@@ -1,0 +1,81 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking.Models
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.Display
+@using Phazor.Components.Extensions
+@inject ICheckingListProvider CheckingListProvider
+@inject ICheckingService CheckingService
+
+@if (_checkingList is not null)
+{
+    <PhazorReactiveNullableValue Value="_checkingList.HasActive" Context="hasActive">
+        <MudStack Row="true" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
+
+            <MudButton
+                StartIcon="@Icons.Material.Filled.Balance"
+                Disabled="hasActive"
+                OnClick="@OnStartCheckingClicked">
+
+                Start Checking
+
+            </MudButton>
+
+        </MudStack>
+    </PhazorReactiveNullableValue>
+
+    <MudList Clickable="true">
+        <PhazorReactiveForEach Elements="_checkingList.Values" Context="checking">
+
+            <MudListItem
+                Value="checking.Id"
+                OnClickHandlerPreventDefault="true"
+                Disabled="@(checking.IsCompleted is false)"
+                OnClick="@(() => OnCheckingSelected(checking))">
+
+                <MudStack Justify="Justify.SpaceBetween" Row="true">
+
+                    @checking.CreatedAt.ToString("dd.MM.yyyy hh:mm")
+
+                    <MudIcon
+                        Icon="@Icons.Material.Filled.Circle"
+                        Color="@(checking.IsCompleted ? Color.Success : Color.Warning)"/>
+
+                </MudStack>
+
+            </MudListItem>
+
+        </PhazorReactiveForEach>
+    </MudList>
+}
+
+@code {
+    private ICheckingList? _checkingList;
+
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+    [Parameter]
+    public IDisplayContentConsumer? Display { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SubjectCourseId.Equals(default))
+            return;
+
+        _checkingList = await CheckingListProvider.GetCheckingListAsync(SubjectCourseId, default);
+    }
+
+    private void OnCheckingSelected(SubjectCourseChecking checking)
+    {
+        Display?.Consume(
+            @<CheckingResultViewComponent CheckingId="checking.Id" SubjectCourseId="SubjectCourseId"/>);
+    }
+
+    private async Task OnStartCheckingClicked()
+    {
+        if (SubjectCourseId.Equals(default))
+            return;
+
+        await CheckingService.StartAsync(SubjectCourseId, default);
+    }
+
+}

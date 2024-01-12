@@ -1,0 +1,72 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses.Associations
+@using System.Reactive.Linq
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses.Extensions
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.Display
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourses.Components.Tabs
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourses.Components.Associations
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Subjects.Components
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Assignments.Components
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourseGroups.Components
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Queues.Components
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Checking.Components
+
+@if (SubjectCourse is not null)
+{
+    <MudStack
+        Justify="Justify.FlexStart"
+        Style="overflow-x: scroll; padding-top: 10px; padding-bottom: 10px; padding-left: 5px; flex-shrink: 0"
+        Row="true">
+
+        @if (SubjectCourse is not null)
+        {
+            <SubjectCourseActionsComponent SubjectCourseId="SubjectCourse.Id"/>
+
+
+            IObservable<IEnumerable<SubjectCourseAssociation>> associations = SubjectCourse.Associations
+                .Select(c => c.OrderBy(x => x.GetOrdinal()));
+
+            <PhazorReactiveForEach Elements="associations" Context="association">
+
+                @switch (association)
+                {
+                    case GithubSubjectCourseAssociation a:
+                        <GithubSubjectCourseAssociationComponent Association="a"/>
+                        break;
+
+                    case GoogleSubjectCourseAssociation a:
+                        <GoogleSubjectCourseAssociationComponent Association="a"/>
+                        break;
+                }
+
+            </PhazorReactiveForEach>
+        }
+        else
+        {
+            <MudStack Row="true">
+                <MudSkeleton
+                    Width="125px"
+                    Height="218px"
+                    Animation="Animation.Wave"/>
+
+                <MudSkeleton
+                    Width="340px"
+                    Height="218px"
+                    Animation="Animation.Wave"/>
+
+                <MudSkeleton
+                    Width="280px"
+                    Height="218px"
+                    Animation="Animation.Wave"/>
+            </MudStack>
+        }
+
+    </MudStack>
+}
+
+@code {
+
+    [Parameter]
+    public ISubjectCourse? SubjectCourse { get; set; }
+
+}

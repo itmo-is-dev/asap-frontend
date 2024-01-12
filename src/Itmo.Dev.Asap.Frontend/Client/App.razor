@@ -1,5 +1,4 @@
 ﻿@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Shared
-@inject NavigationManager NavigationManager
 
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly"
@@ -8,7 +7,7 @@
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
-                    @{ NavigationManager.NavigateTo("/login"); }
+                    <Redirect Url="/login"/>
                 </NotAuthorized>
             </AuthorizeRouteView>
 

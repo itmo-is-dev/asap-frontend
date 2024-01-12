@@ -6,34 +6,27 @@
 @inject IUserService UserService
 @inject IDialogService DialogService
 
-<MudCard Class="pa-3 mb-3">
-    <MudStack Row="true" Justify="Justify.SpaceBetween">
-        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+<QueryParameters ParametersSpacerGrow="2">
+    <Parameters>
+        <StringQueryParameter
+            @ref="_nameQuery"
+            Label="Name"/>
 
-            <StringQueryParameterComponent
-                @ref="_nameQuery"
-                Label="Name"
-                PreviewWidth="80px"/>
+        <MudDivider Vertical="true"/>
 
-            <MudDivider Vertical="true"/>
+        <NumericQueryParameter
+            T="int"
+            @ref="_universityIdQuery"
+            Label="University id"/>
 
-            <NumericQueryParameterComponent
-                T="int"
-                @ref="_universityIdQuery"
-                Label="University id"
-                PreviewWidth="100px"/>
-
-            <MudDivider Vertical="true"/>
-
-        </MudStack>
-
+    </Parameters>
+    <EndContent>
         <MudIconButton
             Icon="@Icons.Material.Outlined.Search"
             Disabled="_isLoading"
             OnClick="@SearchAsync"/>
-
-    </MudStack>
-</MudCard>
+    </EndContent>
+</QueryParameters>
 
 <MudTable
     Items="_users"
@@ -89,8 +82,8 @@
         CloseOnEscapeKey = true,
     };
 
-    private StringQueryParameterComponent? _nameQuery;
-    private NumericQueryParameterComponent<int>? _universityIdQuery;
+    private StringQueryParameter? _nameQuery;
+    private NumericQueryParameter<int>? _universityIdQuery;
 
     private bool _isLoading;
 

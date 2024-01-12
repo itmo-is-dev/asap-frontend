@@ -1,8 +1,9 @@
 @using Itmo.Dev.Asap.Frontend.Application.Abstractions.Queues
 @using System.Reactive.Subjects
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.Display
+@using Phazor.Components.Extensions
 @inject IQueueListProvider QueueListProvider
 @inject IJSRuntime Js
-@inject IDialogService DialogService
 
 @if (_queueList is not null)
 {
@@ -22,18 +23,13 @@
 }
 
 @code {
-
-    private static readonly DialogOptions DialogOptions = new DialogOptions
-    {
-        FullScreen = true,
-        CloseButton = true,
-        CloseOnEscapeKey = true,
-    };
-
     private IQueueList? _queueList;
 
     [Parameter]
     public Guid SubjectCourseId { get; set; }
+
+    [Parameter]
+    public IDisplayContentConsumer? Display { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -45,8 +41,7 @@
 
     private void OnListItemClicked(Guid subjectCourseId, Guid studentGroupId)
     {
-        DialogService.ShowTemplated(
-            DialogOptions,
+        Display?.Consume(
             @<QueueComponent SubjectCourseId="subjectCourseId" StudentGroupId="studentGroupId"/>);
     }
 

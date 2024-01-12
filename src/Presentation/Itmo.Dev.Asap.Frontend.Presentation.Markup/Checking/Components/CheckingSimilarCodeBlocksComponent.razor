@@ -1,0 +1,57 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking.Models
+
+@if (CodeBlocks is not null)
+{
+    <MudExpansionPanel>
+
+        <TitleContent>
+            <MudStack Row="true" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
+
+                <MudText Typo="Typo.h4">
+                    @(CodeBlocks.SimilarityScore * 100)%
+                </MudText>
+
+                <MudText>
+                    @ToDisplayString(CodeBlocks.First)
+                </MudText>
+
+                |
+
+                <MudText>
+                    @ToDisplayString(CodeBlocks.Second)
+                </MudText>
+
+            </MudStack>
+        </TitleContent>
+
+        <ChildContent>
+            <MudStack Row="true" Justify="Justify.SpaceBetween">
+
+                <MudStack Style="width: 50%">
+                    <MudText Typo="Typo.caption">@CodeBlocks.First.FilePath</MudText>
+                    <MudMarkdown Value="@ToMarkdownCode(CodeBlocks.First)"></MudMarkdown>
+                </MudStack>
+
+                <MudStack Style="width: 50%">
+                    <MudText Typo="Typo.caption">@CodeBlocks.Second.FilePath</MudText>
+                    <MudMarkdown Value="@ToMarkdownCode(CodeBlocks.Second)"></MudMarkdown>
+                </MudStack>
+
+            </MudStack>
+        </ChildContent>
+
+    </MudExpansionPanel>
+}
+
+@code {
+
+    [Parameter]
+    public CheckingSimilarCodeBlocks? CodeBlocks { get; set; }
+
+    private static string ToDisplayString(CheckingCodeBlock codeBlock)
+        => $"{codeBlock.FilePath} ({codeBlock.LineFrom}:{codeBlock.LineTo})";
+
+    private static string ToMarkdownCode(CheckingCodeBlock codeBlock)
+        => $"```{Path.GetExtension(codeBlock.FilePath)}\n{codeBlock.Content}\n```";
+
+}

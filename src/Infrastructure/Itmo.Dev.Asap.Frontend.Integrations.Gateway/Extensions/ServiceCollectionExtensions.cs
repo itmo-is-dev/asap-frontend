@@ -1,4 +1,5 @@
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Assignments;
+using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Github;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.GroupAssignments;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity;
@@ -36,6 +37,10 @@ public static class ServiceCollectionExtensions
 
         collection.AddSingleton<IIdentityService, IdentityService>();
         collection.AddSingleton<IGithubService, GithubService>();
+
+        collection.AddSingleton<ICheckingService, CheckingService>();
+        collection.AddSingleton<ICheckingResultService, CheckingResultService>();
+        collection.AddSingleton<ICheckingCodeBlocksService, CheckingCodeBlocksService>();
 
         return collection;
     }

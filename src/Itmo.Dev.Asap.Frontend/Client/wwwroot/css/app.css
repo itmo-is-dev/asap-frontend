@@ -1,5 +1,6 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    position: fixed;
 }
 
 @keyframes loader {
@@ -88,4 +89,24 @@ html, body {
 
 .mud-dialog-fullscreen {
     overflow-y: scroll !important;
+}
+
+.similarity-score {
+    justify-content: end;
+    z-index: 1;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.similarity-score:not(.collapsed) {
+    align-items: center;
+}
+
+.similarity-score.collapsed {
+    align-items: start;
+}
+
+code {
+    font-size: 12px;
 }

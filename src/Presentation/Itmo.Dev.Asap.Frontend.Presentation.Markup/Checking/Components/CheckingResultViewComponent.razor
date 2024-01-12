@@ -1,0 +1,42 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking.Models
+@inject IDialogService DialogService
+
+@if (CheckingId is not null)
+{
+    <MudStack Row="true" AlignItems="AlignItems.Start" Style="width: 100%" Class="mt-3">
+
+        <CheckingResultListComponent
+            CheckingId="CheckingId"
+            SubjectCourseId="SubjectCourseId"
+            OnResultSelected="OnResultSelected"/>
+
+    </MudStack>
+}
+
+@code {
+
+    private static readonly DialogOptions DialogOptions = new DialogOptions
+    {
+        CloseButton = true,
+        CloseOnEscapeKey = true,
+        FullScreen = false,
+        MaxWidth = MaxWidth.ExtraExtraLarge,
+        FullWidth = true,
+    };
+
+    [Parameter]
+    public long? CheckingId { get; set; }
+    
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+    private void OnResultSelected(SubjectCourseCheckingResult result)
+    {
+        DialogService.ShowTemplated(
+            DialogOptions,
+            @<CheckingCodeBlocksListComponent CheckingId="CheckingId" Result="result"/>,
+            contentStyle: "padding-top: 20px",
+            style: "height: 100%");
+    }
+
+}

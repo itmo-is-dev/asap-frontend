@@ -1,0 +1,41 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Subjects.Components
+
+<MudStack Row="true" AlignItems="AlignItems.Center">
+
+    <SubjectsBreadcrumbComponent/>
+
+    <MudIcon Icon="@Icons.Material.Filled.ArrowRight"/>
+
+    @if (SubjectCourse is not null)
+    {
+        <PhazorReactiveValue Value="SubjectCourse.SubjectId" Context="subjectId">
+            <SubjectBreadcrumbComponent SubjectId="subjectId"/>
+        </PhazorReactiveValue>
+    }
+    else
+    {
+        <MudSkeleton Width="200px" Height="40px" Animation="Animation.Wave"/>
+    }
+
+    <MudIcon Icon="@Icons.Material.Filled.ArrowRight"/>
+
+    @if (SubjectCourse is not null)
+    {
+        <MudText Typo="Typo.h4">
+            <PhazorReactiveText Value="SubjectCourse.Name"/>
+        </MudText>
+    }
+    else
+    {
+        <MudSkeleton Width="200px" Height="40px"/>
+    }
+
+</MudStack>
+
+@code {
+
+    [Parameter]
+    public ISubjectCourse? SubjectCourse { get; set; }
+
+}

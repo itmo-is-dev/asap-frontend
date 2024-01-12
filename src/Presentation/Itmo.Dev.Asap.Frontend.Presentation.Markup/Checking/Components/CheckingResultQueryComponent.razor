@@ -1,0 +1,76 @@
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Checking.Controllers
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Assignments.Models
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Assignments
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourseGroups
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourseGroups.Models
+@inject IAssignmentService AssignmentService
+@inject ISubjectCourseGroupService SubjectCourseGroupService
+@inject ICheckingResultService CheckingResultService
+
+<QueryParameters JustifyParameters="Justify.SpaceEvenly">
+    <Parameters>
+
+        <AutoCompleteQueryParameter
+            @ref="_assignments"
+            Label="Assignments"
+            SearchFunc="SearchAssignmentsAsync"
+            ToStringFunc="x => x.Name"
+            ValuesChanged="OnQueryChanged"/>
+
+        <MudDivider Vertical="true"/>
+
+        <AutoCompleteQueryParameter
+            @ref="_groups"
+            Label="Groups"
+            SearchFunc="SearchGroupsAsync"
+            ToStringFunc="x => x.Name"
+            ValuesChanged="OnQueryChanged"/>
+
+    </Parameters>
+</QueryParameters>
+
+@code {
+
+    private AutoCompleteQueryParameter<AssignmentInfo>? _assignments;
+    private AutoCompleteQueryParameter<SubjectCourseGroupInfo>? _groups;
+
+    [Parameter]
+    public long? CheckingId { get; set; }
+
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+    [Parameter]
+    public CheckingQueryPaginationController? Controller { get; set; }
+
+    [Parameter]
+    public EventCallback<CheckingQueryPaginationController> ControllerChanged { get; set; }
+
+    private async Task<IEnumerable<AssignmentInfo>> SearchAssignmentsAsync(string term, CancellationToken cancellationToken)
+    {
+        return await AssignmentService
+            .QueryAsync(SubjectCourseId, new[] { term }, cancellationToken);
+    }
+
+    private async Task<IEnumerable<SubjectCourseGroupInfo>> SearchGroupsAsync(string term, CancellationToken cancellationToken)
+    {
+        return await SubjectCourseGroupService
+            .QueryAsync(SubjectCourseId, new[] { term }, cancellationToken);
+    }
+
+    private async Task OnQueryChanged()
+    {
+        if (CheckingId is null)
+            return;
+
+        var controller = new CheckingQueryPaginationController(
+            CheckingResultService,
+            CheckingId.Value,
+            _assignments?.Values.Select(x => x.Id).ToArray() ?? Array.Empty<Guid>(),
+            _groups?.Values.Select(x => x.Id).ToArray() ?? Array.Empty<Guid>());
+
+        await ControllerChanged.InvokeAsync(controller);
+    }
+
+}

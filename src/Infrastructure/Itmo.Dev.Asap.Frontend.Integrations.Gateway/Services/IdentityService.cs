@@ -47,7 +47,7 @@ internal class IdentityService : IIdentityService
                 return new LoginResult.Failure(error?.Message ?? string.Empty);
             }
 
-            var evt = new TokenUpdated(response.Content.Token);
+            var evt = new TokenUpdated(response.Content.Token, DateTimeOffset.UtcNow);
             _publisher.Publish(evt);
 
             return new LoginResult.Success();
@@ -61,7 +61,7 @@ internal class IdentityService : IIdentityService
 
     public ValueTask LogoutAsync(CancellationToken cancellationToken)
     {
-        var evt = new AuthorizationExpired();
+        var evt = new AuthorizationExpired(DateTimeOffset.UtcNow);
         _publisher.Publish(evt);
 
         return ValueTask.CompletedTask;

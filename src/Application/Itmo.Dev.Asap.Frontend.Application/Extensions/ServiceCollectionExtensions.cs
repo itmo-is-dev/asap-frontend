@@ -1,4 +1,5 @@
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Assignments;
+using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.GroupAssignments;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Queues;
@@ -10,6 +11,7 @@ using Itmo.Dev.Asap.Frontend.Application.Abstractions.Subjects;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Tools;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Users;
 using Itmo.Dev.Asap.Frontend.Application.Assignments;
+using Itmo.Dev.Asap.Frontend.Application.Checking;
 using Itmo.Dev.Asap.Frontend.Application.GroupAssignments;
 using Itmo.Dev.Asap.Frontend.Application.Identity;
 using Itmo.Dev.Asap.Frontend.Application.Queues;
@@ -62,6 +64,8 @@ public static class ServiceCollectionExtensions
 
         collection.AddSingleton<PrincipalParserTokenHandler>();
         collection.AddSingleton<PrincipalExpirationHandler>();
+
+        collection.AddSingleton<ICheckingListProvider, CheckingListProvider>();
 
         return collection;
     }

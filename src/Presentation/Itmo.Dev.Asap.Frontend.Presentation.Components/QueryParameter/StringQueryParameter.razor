@@ -1,0 +1,49 @@
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.QueryParameter.Parameters
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.Parameters
+@namespace Itmo.Dev.Asap.Frontend.Presentation.Components
+
+<ParameterComponent
+    T="string"
+    @ref="_parameterComponent"
+    Label="@Label"
+    PreviewWidth="@PreviewWidth"
+    ToStringFunc="@(x => x)">
+
+    <ValueInput>
+        <MudTextField
+            @ref="_field"
+            AutoFocus="true"
+            T="string"
+            Variant="Variant.Outlined"
+            Clearable="true"
+            Immediate="true"
+            OnKeyDown="@(e => OnKeyDownAsync(context.ParameterController, e))"/>
+    </ValueInput>
+
+</ParameterComponent>
+
+@code {
+
+    private ParameterComponent<string>? _parameterComponent;
+    private MudTextField<string>? _field;
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public string? PreviewWidth { get; set; }
+
+    public IEnumerable<string> Values => _parameterComponent?.Values.Select(x => x.Value) ?? Enumerable.Empty<string>();
+
+    private async Task OnKeyDownAsync(IParameterController<string> controller, KeyboardEventArgs arg)
+    {
+        if (_field is not null && arg.Key.Equals("enter", StringComparison.OrdinalIgnoreCase))
+        {
+            controller.AddValue(new QueryValue<string>(_field.Value));
+            await controller.OnValuesChangedAsync();
+
+            await _field.Clear();
+        }
+    }
+
+}

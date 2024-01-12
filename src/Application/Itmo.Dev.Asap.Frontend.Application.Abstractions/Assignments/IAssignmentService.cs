@@ -26,4 +26,9 @@ public interface IAssignmentService
         Guid assignmentId,
         double points,
         CancellationToken cancellationToken);
+
+    ValueTask<IEnumerable<AssignmentInfo>> QueryAsync(
+        Guid subjectCourseId,
+        IEnumerable<string> names,
+        CancellationToken cancellationToken);
 }

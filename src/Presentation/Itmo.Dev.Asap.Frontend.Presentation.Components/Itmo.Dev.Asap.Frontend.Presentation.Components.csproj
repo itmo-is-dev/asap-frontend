@@ -13,5 +13,18 @@
         <PackageReference Include="MudBlazor"/>
         <PackageReference Include="Phazor.Components"/>
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="wwwroot\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="QueryParameter\AutoComplete\AutoCompleteInputComponent.razor" />
+      <UpToDateCheckInput Remove="QueryParameter\AutoComplete\AutoCompleteParameterComponent.razor" />
+      <UpToDateCheckInput Remove="QueryParameter\AutoComplete\AutoCompleteValuesComponent.razor" />
+      <UpToDateCheckInput Remove="QueryParameter\TextFieldParameter\NumericQueryParameterComponent.razor" />
+      <UpToDateCheckInput Remove="QueryParameter\TextFieldParameter\StringQueryParameterComponent.razor" />
+      <UpToDateCheckInput Remove="QueryParameter\TextFieldParameter\TextFieldParameterComponent.razor" />
+    </ItemGroup>
     
 </Project>

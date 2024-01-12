@@ -32,10 +32,10 @@
             </MudDrawer>
 
             <MudMainContent
-                Class="d-flex justify-start align-start mud-height-full hide-scroll-bar"
-                Style="@($"overflow-y: scroll; background: {Background}; border-top-right-radius: {ContentBorderRadius}; border-bottom-right-radius: {ContentBorderRadius}")">
+                Class="mud-height-full pt-7"
+                Style="@($"background: {Background}; border-top-right-radius: {ContentBorderRadius}; border-bottom-right-radius: {ContentBorderRadius}")">
 
-                <MudContainer Class="mt-6 mb-5" MaxWidth="MaxWidth.ExtraLarge">
+                <MudContainer Class="mt-0 mb-0 pb-5 mud-height-full" MaxWidth="MaxWidth.ExtraLarge">
                     @Body
                 </MudContainer>
 

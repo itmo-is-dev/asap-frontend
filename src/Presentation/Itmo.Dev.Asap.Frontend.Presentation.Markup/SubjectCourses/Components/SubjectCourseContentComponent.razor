@@ -1,0 +1,79 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses.Associations
+@using System.Reactive.Linq
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses.Extensions
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.Display
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourses.Components.Tabs
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourses.Components.Associations
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Subjects.Components
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Assignments.Components
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourseGroups.Components
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Queues.Components
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Checking.Components
+
+
+@if (SubjectCourse is not null)
+{
+    <MudTabs
+        Elevation="2"
+        Rounded="true"
+        ApplyEffectsToContainer="true"
+        PanelClass="pa-6"
+        ActivePanelIndex="-1"
+        Style="overflow-y: scroll">
+
+        <MudTabPanel>
+            <TabContent>
+                <AssignmentsTabComponent SubjectCourseId="SubjectCourse.Id"/>
+            </TabContent>
+            <ChildContent>
+                <AssignmentListComponent SubjectCourseId="SubjectCourse.Id" Display="Display"/>
+            </ChildContent>
+        </MudTabPanel>
+
+        <MudTabPanel>
+            <TabContent>
+                <GroupsTabComponent SubjectCourseId="SubjectCourse.Id"/>
+            </TabContent>
+            <ChildContent>
+                <SubjectCourseGroupListComponent SubjectCourseId="SubjectCourse.Id"/>
+            </ChildContent>
+        </MudTabPanel>
+
+        <MudTabPanel>
+            <TabContent>
+                <QueuesTabComponent/>
+            </TabContent>
+            <ChildContent>
+                <QueueListComponent SubjectCourseId="SubjectCourse.Id" Display="Display"/>
+            </ChildContent>
+        </MudTabPanel>
+
+        <MudTabPanel>
+            <TabContent>
+                <CheckingTabComponent/>
+            </TabContent>
+            <ChildContent>
+                <CheckingListComponent SubjectCourseId="SubjectCourse.Id" Display="Display"/>
+            </ChildContent>
+        </MudTabPanel>
+
+    </MudTabs>
+}
+else
+{
+    <MudSkeleton
+        Width="100%"
+        Height="200px"
+        Animation="Animation.Wave"/>
+}
+
+@code {
+
+    [Parameter]
+    public ISubjectCourse? SubjectCourse { get; set; }
+
+    [Parameter]
+    public IDisplayContentConsumer? Display { get; set; }
+
+}

@@ -1,0 +1,64 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking.Models
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Checking.Models
+@implements IForwardPaginatorController<CheckingSimilarCodeBlocks, CodeBlocksState>
+@inject ICheckingCodeBlocksService CheckingCodeBlocksService
+
+@if (CheckingId is not null && Result is not null)
+{
+    <PhazorForwardPaginator Controller="@this">
+
+        <Loader>
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
+        </Loader>
+
+        <ChildContent Context="codeBlocks">
+            <MudExpansionPanels MultiExpansion="true" Elevation="3" Style="margin: 8px">
+                @foreach (var codeBlock in codeBlocks)
+                {
+                    <CheckingSimilarCodeBlocksComponent CodeBlocks="codeBlock"/>
+                }
+            </MudExpansionPanels>
+        </ChildContent>
+
+    </PhazorForwardPaginator>
+}
+
+@code {
+
+    [Parameter]
+    public long? CheckingId { get; set; }
+
+    [Parameter]
+    public SubjectCourseCheckingResult? Result { get; set; }
+
+    public CodeBlocksState CreateState()
+        => new CodeBlocksState(0, true);
+
+    public bool ShouldLoadNextPage(CodeBlocksState state)
+        => state.HasNext;
+
+    public async Task<ForwardPageLoadResult<CheckingSimilarCodeBlocks, CodeBlocksState>> LoadPageAsync(
+        CodeBlocksState state,
+        CancellationToken cancellationToken)
+    {
+        if (CheckingId is null || Result is null)
+        {
+            return new ForwardPageLoadResult<CheckingSimilarCodeBlocks, CodeBlocksState>(
+                Enumerable.Empty<CheckingSimilarCodeBlocks>(),
+                new CodeBlocksState(0, false));
+        }
+
+        var response = await CheckingCodeBlocksService.GetCheckingCodeBlocksAsync(
+            CheckingId.Value,
+            Result.FirstSubmission.SubmissionId,
+            Result.SecondSubmission.SubmissionId,
+            state.Cursor,
+            cancellationToken);
+
+        return new ForwardPageLoadResult<CheckingSimilarCodeBlocks, CodeBlocksState>(
+            response.CodeBlocks,
+            new CodeBlocksState(state.Cursor + response.Count, response.HasNext));
+    }
+
+}
