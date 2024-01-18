@@ -2,6 +2,7 @@
 @using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking.Models
 @using Itmo.Dev.Asap.Frontend.Presentation.Components.Display
 @using Phazor.Components.Extensions
+@using System.Reactive.Linq
 @inject ICheckingListProvider CheckingListProvider
 @inject ICheckingService CheckingService
 
@@ -23,7 +24,13 @@
     </PhazorReactiveNullableValue>
 
     <MudList Clickable="true">
-        <PhazorReactiveForEach Elements="_checkingList.Values" Context="checking">
+
+        @{
+            IObservable<IOrderedEnumerable<SubjectCourseChecking>> values = _checkingList.Values
+                .Select(enumerable => enumerable.OrderByDescending(x => x.CreatedAt));
+        }
+
+        <PhazorReactiveForEach Elements="values" Context="checking">
 
             <MudListItem
                 Value="checking.Id"
