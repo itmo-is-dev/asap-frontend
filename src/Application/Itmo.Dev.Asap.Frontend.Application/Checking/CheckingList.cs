@@ -22,14 +22,18 @@ internal class CheckingList : ICheckingList
         _disposable = Disposable.Empty;
         _subject = new ReplaySubject<IEnumerable<SubjectCourseChecking>>();
 
-        var values = new List<SubjectCourseChecking>();
+        var values = new HashSet<SubjectCourseChecking>(SubjectCourseCheckingComparer.Instance);
 
         provider
             .Observe<SubjectCourseCheckingsLoaded>()
             .Where(x => x.SubjectCourseId.Equals(subjectCourseId))
             .Subscribe(e =>
             {
-                values.AddRange(e.Checkings);
+                foreach (SubjectCourseChecking checking in e.Checkings)
+                {
+                    values.Add(checking);
+                }
+
                 _subject.OnNext(values);
             })
             .CombineTo(ref _disposable);

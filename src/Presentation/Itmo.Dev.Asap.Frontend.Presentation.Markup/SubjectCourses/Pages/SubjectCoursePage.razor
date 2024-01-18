@@ -2,7 +2,9 @@
 @using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourses.Components
 @using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses
 @using Itmo.Dev.Asap.Frontend.Presentation.Components.Display
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourses.Models
 @inject ISubjectCourseProvider SubjectCourseProvider
+@inject NavigationManager NavigationManager
 
 <MudStack Style="height: 100%">
 
@@ -14,7 +16,9 @@
 
         <SubjectCourseContentComponent
             SubjectCourse="_subjectCourse"
-            Display="_displayController"/>
+            Display="_displayController"
+            SelectedTab="TabEnum"
+            SelectedTabChanged="@OnSelectedTabChanged"/>
 
         <DisplayComponent
             Provider="_displayController">
@@ -36,8 +40,14 @@
 
     private ISubjectCourse? _subjectCourse;
 
+    private SubjectCourseContentTab TabEnum => Map(Tab);
+
     [Parameter]
     public Guid SubjectCourseId { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "tab")]
+    public string? Tab { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -45,6 +55,36 @@
             return;
 
         _subjectCourse = await SubjectCourseProvider.LoadAsync(SubjectCourseId, default);
+    }
+
+    private void OnSelectedTabChanged(SubjectCourseContentTab tab)
+    {
+        Tab = Map(tab);
+        NavigationManager.NavigateTo(NavigationManager.GetUriWithQueryParameter("tab", Tab));
+    }
+
+    private static string Map(SubjectCourseContentTab tab)
+    {
+        return tab switch
+        {
+            SubjectCourseContentTab.Assignments => "assignments",
+            SubjectCourseContentTab.Groups => "groups",
+            SubjectCourseContentTab.Queues => "queues",
+            SubjectCourseContentTab.Checking => "checkings",
+            _ => throw new ArgumentOutOfRangeException(nameof(tab), tab, null)
+        };
+    }
+
+    private static SubjectCourseContentTab Map(string? tab)
+    {
+        return tab switch
+        {
+            "assignments" => SubjectCourseContentTab.Assignments,
+            "groups" => SubjectCourseContentTab.Groups,
+            "queues" => SubjectCourseContentTab.Queues,
+            "checkings" => SubjectCourseContentTab.Checking,
+            _ => SubjectCourseContentTab.Assignments,
+        };
     }
 
 }
