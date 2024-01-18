@@ -1,4 +1,5 @@
 @using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking.Models
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Submissions
 
 @if (Result is not null)
 {
@@ -17,15 +18,15 @@
                 @Result.AssignmentName
             </MudText>
 
-            <MudStack Row="true" Style="justify-content: center">
+            <MudStack Row="true" Style="justify-content: center; width: 100%">
 
-                <MudText Typo="@StudentNameTypo">
+                <MudText Typo="@StudentNameTypo" Class="@FirstSubmissionClass">
                     @Result.FirstSubmission.Student.DisplayName
                 </MudText>
 
                 <MudIcon Icon="@Icons.Material.Filled.Clear"/>
 
-                <MudText Typo="StudentNameTypo">
+                <MudText Typo="StudentNameTypo" Class="@SecondSubmissionClass">
                     @Result.SecondSubmission.Student.DisplayName
                 </MudText>
 
@@ -40,6 +41,14 @@
     private Typo SimilarityScoreTypo => Typo.h4;
     private Typo AssignmentNameTypo => Typo.body2;
     private Typo StudentNameTypo => Typo.body1;
+
+    private string FirstSubmissionClass => Result?.FirstSubmission.State is SubmissionState.Banned
+        ? "first-submission banned"
+        : "first-submission";
+    
+    private string SecondSubmissionClass => Result?.SecondSubmission.State is SubmissionState.Banned
+        ? "second-submission banned"
+        : "second-submission";
 
     [Parameter]
     public SubjectCourseCheckingResult? Result { get; set; }

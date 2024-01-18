@@ -1,8 +1,10 @@
 @using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking.Models
 @using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Submissions
 @using Itmo.Dev.Asap.Frontend.Presentation.Markup.Checking.Models
 @implements IForwardPaginatorController<CheckingSimilarCodeBlocks, CodeBlocksState>
 @inject ICheckingCodeBlocksService CheckingCodeBlocksService
+@inject ISubmissionService SubmissionService
 
 @if (CheckingId is not null && Result is not null)
 {
@@ -13,6 +15,32 @@
         </Loader>
 
         <ChildContent Context="codeBlocks">
+
+            <MudStack Row="true" Justify="Justify.SpaceBetween" Class="pa-2">
+
+                <ConfirmationButtonComponent
+                    Disabled="@(Result.FirstSubmission.State is SubmissionState.Banned)"
+                    Color="Color.Error"
+                    Variant="Variant.Filled"
+                    OnSubmitted="BanFirstSubmissionAsync">
+
+                    Ban @Result.FirstSubmission.Student.DisplayName
+
+                </ConfirmationButtonComponent>
+
+                <ConfirmationButtonComponent
+                    Disabled="@(Result.SecondSubmission.State is SubmissionState.Banned)"
+                    Color="Color.Error"
+                    Variant="Variant.Filled"
+                    Reversed="true"
+                    OnSubmitted="BanSecondSubmissionAsync">
+
+                    Ban @Result.SecondSubmission.Student.DisplayName
+
+                </ConfirmationButtonComponent>
+
+            </MudStack>
+
             <MudExpansionPanels MultiExpansion="true" Elevation="3" Style="margin: 8px">
                 @foreach (var codeBlock in codeBlocks)
                 {
@@ -59,6 +87,44 @@
         return new ForwardPageLoadResult<CheckingSimilarCodeBlocks, CodeBlocksState>(
             response.CodeBlocks,
             new CodeBlocksState(state.Cursor + response.Count, response.HasNext));
+    }
+
+    private async Task BanFirstSubmissionAsync()
+    {
+        if (Result is null)
+            return;
+
+        var success = await SubmissionService.BanAsync(
+            Result.FirstSubmission.Student.Id,
+            Result.AssignmentId,
+            default);
+
+        if (success is false)
+            return;
+
+        Result = Result with
+        {
+            FirstSubmission = Result.FirstSubmission with { State = SubmissionState.Banned },
+        };
+    }
+
+    private async Task BanSecondSubmissionAsync()
+    {
+        if (Result is null)
+            return;
+
+        var success = await SubmissionService.BanAsync(
+            Result.SecondSubmission.Student.Id,
+            Result.AssignmentId,
+            default);
+
+        if (success is false)
+            return;
+
+        Result = Result with
+        {
+            SecondSubmission = Result.SecondSubmission with { State = SubmissionState.Banned },
+        };
     }
 
 }

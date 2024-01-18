@@ -14,6 +14,7 @@ public static class CheckingMapper
     public static SubjectCourseCheckingResult MapToModel(this CheckingResultDto result)
     {
         return new SubjectCourseCheckingResult(
+            result.AssignmentId,
             result.AssignmentName,
             result.FirstSubmission.MapToModel(),
             result.SecondSubmission.MapToModel(),
@@ -32,7 +33,8 @@ public static class CheckingMapper
     {
         return new CheckingResultSubmissionInfo(
             submission.SubmissionId,
-            new StudentData(submission.StudentId, submission.FirstName, submission.LastName, submission.GroupName));
+            new StudentData(submission.StudentId, submission.FirstName, submission.LastName, submission.GroupName),
+            submission.State.MapToModel());
     }
 
     public static CheckingCodeBlock MapToModel(this CodeBlockDto codeBlock)

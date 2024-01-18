@@ -63,9 +63,12 @@ internal class CheckingService : ICheckingService
             return;
         }
 
-        SubjectCourseChecking checking = response.Content.MapToModel();
-        var evt = new SubjectCourseCheckingsLoaded(subjectCourseId, new[] { checking });
+        var hasActiveEvent = new SubjectCourseHasActiveCheckingUpdated(subjectCourseId, true);
+        _publisher.Publish(hasActiveEvent);
 
-        _publisher.Publish(evt);
+        SubjectCourseChecking checking = response.Content.MapToModel();
+        var checkingsEvent = new SubjectCourseCheckingsLoaded(subjectCourseId, new[] { checking });
+
+        _publisher.Publish(checkingsEvent);
     }
 }

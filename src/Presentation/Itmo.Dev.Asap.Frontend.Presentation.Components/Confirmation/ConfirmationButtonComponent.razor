@@ -1,0 +1,81 @@
+@namespace Itmo.Dev.Asap.Frontend.Presentation.Components
+
+<MudStack
+    Row="true"
+    Justify="Justify.FlexStart"
+    AlignItems="AlignItems.Center"
+    Reverse="@Reversed">
+
+    <MudButton
+        Disabled="@(Disabled || _pressed)"
+        Color="@Color"
+        Variant="Variant"
+        OnClick="@OnButtonClicked">
+
+        @ChildContent
+
+    </MudButton>
+
+    <MudIconButton
+        Style="@ButtonsStyle"
+        Icon="@Icons.Material.Filled.Check"
+        Color="@Color"
+        Variant="Variant"
+        OnClick="@OnSubmitClicked"/>
+
+    <MudIconButton
+        Style="@ButtonsStyle"
+        Icon="@Icons.Material.Filled.Clear"
+        Color="Color.Dark"
+        Variant="Variant"
+        OnClick="@OnCancelClicked"/>
+
+</MudStack>
+
+@code {
+
+    private bool _pressed;
+
+    private string ButtonsStyle => _pressed ? string.Empty : "display: none";
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmitted { get; set; }
+
+    [Parameter]
+    public Color Color { get; set; }
+
+    [Parameter]
+    public Variant Variant { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public bool Reversed { get; set; }
+
+    private void OnButtonClicked()
+    {
+        _pressed = true;
+    }
+
+    private async Task OnSubmitClicked()
+    {
+        try
+        {
+            await OnSubmitted.InvokeAsync();
+        }
+        finally
+        {
+            _pressed = false;
+        }
+    }
+
+    private void OnCancelClicked()
+    {
+        _pressed = false;
+    }
+
+}
