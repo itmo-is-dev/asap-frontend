@@ -1,0 +1,67 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking.Models
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Models
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Checking.Controllers
+@using Phazor.Components.Extensions
+@inject ICheckingResultService CheckingResultService
+
+@if (CheckingId is not null)
+{
+    <MudStack Style="width: 100%">
+
+        <CheckingResultQueryComponent
+            CheckingId="CheckingId"
+            SubjectCourseId="SubjectCourseId"
+            @bind-Controller="_controller"/>
+
+        <MudList Clickable="true" Style="width: 100%">
+
+            <PhazorForwardPaginator Controller="@_controller">
+
+                <Loader>
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
+                </Loader>
+
+                <ChildContent Context="results">
+                    @foreach (var result in results)
+                    {
+                        <MudListItem OnClick="@(() => OnResultSelected.InvokeAsync(result))">
+                            <CheckingResultComponent Result="result"/>
+                        </MudListItem>
+
+                        <MudDivider/>
+                    }
+                </ChildContent>
+
+            </PhazorForwardPaginator>
+
+        </MudList>
+    </MudStack>
+}
+
+@code {
+
+    private CheckingQueryPaginationController? _controller;
+
+    [Parameter]
+    public long? CheckingId { get; set; }
+
+    [Parameter]
+    public Guid SubjectCourseId { get; set; }
+
+    [Parameter]
+    public EventCallback<SubjectCourseCheckingResult> OnResultSelected { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (CheckingId is null)
+            return;
+        
+        _controller = new CheckingQueryPaginationController(
+            CheckingResultService,
+            CheckingId.Value,
+            Array.Empty<Guid>(),
+            Array.Empty<Guid>());
+    }
+
+}

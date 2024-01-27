@@ -1,0 +1,106 @@
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.Parameters
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.Values
+@typeparam T
+@implements IParameterController<T>
+
+<MudStack
+    Row="true"
+    Style="flex: 1 0 0"
+    Spacing="0"
+    AlignItems="AlignItems.Center"
+    Justify="Justify.SpaceBetween">
+
+    <MudText Typo="Typo.body2" Class="pl-3 pr-3">
+        @Label
+    </MudText>
+
+    <div style="@($"max-width: {PreviewWidth}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1")">
+        @Preview
+    </div>
+
+    <MudChip
+        Color="Color.Default"
+        Variant="Variant.Outlined"
+        Size="Size.Small"
+        Class="disable-hover">
+
+        @_values.Count
+
+    </MudChip>
+
+    <MudIconButton
+        Icon="@ArrowIcon" 
+        OnClick="@(() => _listOpen = !_listOpen)"/>
+
+    <MudPopover
+        Open="_listOpen"
+        AnchorOrigin="Origin.BottomRight"
+        TransformOrigin="Origin.TopRight"
+        RelativeWidth="true">
+
+        <ValuesComponent ParameterController="@this">
+            <ValueInput Context="controller">
+                @ValueInput?.Invoke(new ParameterContext<T>(this, controller))
+            </ValueInput>
+        </ValuesComponent>
+
+    </MudPopover>
+
+    <MudOverlay
+        Visible="_listOpen"
+        OnClick="@(() => _listOpen = false)"
+        LockScroll="true"/>
+
+</MudStack>
+
+@code {
+
+    private readonly List<QueryValue<T>> _values = new List<QueryValue<T>>();
+
+    private bool _listOpen;
+
+    private string Preview => string.Join(", ", _values.Select(v => ConvertValueToString(v.Value)));
+
+    private string ArrowIcon => _listOpen
+        ? Icons.Material.Filled.KeyboardArrowDown
+        : Icons.Material.Filled.KeyboardArrowLeft;
+
+    public IEnumerable<QueryValue<T>> Values => _values;
+
+    [Parameter]
+    public RenderFragment<ParameterContext<T>>? ValueInput { get; set; }
+
+    [Parameter]
+    public Func<T, string>? ToStringFunc { get; set; }
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public string? PreviewWidth { get; set; }
+    
+    [Parameter]
+    public EventCallback ValuesChanged { get; set; }
+
+    public async Task OnValuesChangedAsync()
+    {
+        StateHasChanged();
+        await ValuesChanged.InvokeAsync();
+    }
+
+    public string ConvertValueToString(T value)
+    {
+        return ToStringFunc?.Invoke(value) ?? string.Empty;
+    }
+
+    public void AddValue(QueryValue<T> value)
+    {
+        _values.Add(value);
+    }
+
+    public void RemoveValue(QueryValue<T> value)
+    {
+        _values.Remove(value);
+    }
+
+}

@@ -1,157 +1,53 @@
 @page "/courses/{subjectCourseId:guid}"
 @using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourses.Components
-@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourses.Components.Tabs
-@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourses.Components.Associations
-@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Subjects.Components
-@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Assignments.Components
-@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourseGroups.Components
-@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Queues.Components
 @using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses
-@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses.Associations
-@using System.Reactive.Linq
-@using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses.Extensions
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.Display
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.SubjectCourses.Models
 @inject ISubjectCourseProvider SubjectCourseProvider
+@inject NavigationManager NavigationManager
 
-<MudStack Spacing="10">
+<MudStack Style="height: 100%">
 
-    <MudStack Row="true" AlignItems="AlignItems.Center">
+    <SubjectCourseBreadcrumbComponent SubjectCourse="_subjectCourse"/>
 
-        <SubjectsBreadcrumbComponent/>
+    <SubjectCourseInfoComponent SubjectCourse="_subjectCourse"/>
 
-        <MudIcon Icon="@Icons.Material.Filled.ArrowRight"/>
+    <MudStack Row="true" Style="flex-grow: 1; min-height: 0">
 
-        @if (_subjectCourse is not null)
-        {
-            <PhazorReactiveValue Value="_subjectCourse.SubjectId" Context="subjectId">
-                <SubjectBreadcrumbComponent SubjectId="subjectId"/>
-            </PhazorReactiveValue>
-        }
-        else
-        {
-            <MudSkeleton Width="200px" Height="40px" Animation="Animation.Wave"/>
-        }
+        <SubjectCourseContentComponent
+            SubjectCourse="_subjectCourse"
+            Display="_displayController"
+            SelectedTab="TabEnum"
+            SelectedTabChanged="@OnSelectedTabChanged"/>
 
-        <MudIcon Icon="@Icons.Material.Filled.ArrowRight"/>
+        <DisplayComponent
+            Provider="_displayController">
 
-        @if (_subjectCourse is not null)
-        {
-            <MudText Typo="Typo.h4">
-                <PhazorReactiveText Value="_subjectCourse.Name"/>
-            </MudText>
-        }
-        else
-        {
-            <MudSkeleton Width="200px" Height="40px"/>
-        }
+            <NoContent>
+                <div style="width: 100%; height: 100%"></div>
+            </NoContent>
+
+        </DisplayComponent>
 
     </MudStack>
-
-    <MudStack
-        Justify="Justify.FlexStart"
-        Style="overflow-x: scroll; padding-top: 10px; padding-bottom: 10px; padding-left: 5px;"
-        Row="true">
-
-        @if (_subjectCourse is not null)
-        {
-            <SubjectCourseActionsComponent SubjectCourseId="_subjectCourse.Id"/>
-
-
-            IObservable<IEnumerable<SubjectCourseAssociation>> associations = _subjectCourse.Associations
-                .Select(c => c.OrderBy(x => x.GetOrdinal()));
-
-            <PhazorReactiveForEach Elements="associations" Context="association">
-
-                @switch (association)
-                {
-                    case GithubSubjectCourseAssociation a:
-                        <GithubSubjectCourseAssociationComponent Association="a"/>
-                        break;
-
-                    case GoogleSubjectCourseAssociation a:
-                        <GoogleSubjectCourseAssociationComponent Association="a"/>
-                        break;
-                }
-
-            </PhazorReactiveForEach>
-        }
-        else
-        {
-            <MudStack Row="true">
-                <MudSkeleton
-                    Width="125px"
-                    Height="218px"
-                    Animation="Animation.Wave"/>
-
-                <MudSkeleton
-                    Width="340px"
-                    Height="218px"
-                    Animation="Animation.Wave"/>
-
-                <MudSkeleton
-                    Width="280px"
-                    Height="218px"
-                    Animation="Animation.Wave"/>
-            </MudStack>
-        }
-
-    </MudStack>
-
-    @if (_subjectCourse is not null)
-    {
-        <MudTabs
-            Elevation="2"
-            Rounded="true"
-            ApplyEffectsToContainer="true"
-            PanelClass="pa-6"
-            ActivePanelIndex="-1">
-
-            <MudTabPanel>
-                <TabContent>
-                    <AssignmentsTabComponent SubjectCourseId="_subjectCourse.Id"/>
-                </TabContent>
-                <ChildContent>
-                    <AssignmentListComponent SubjectCourseId="_subjectCourse.Id"/>
-                </ChildContent>
-            </MudTabPanel>
-
-            <MudTabPanel>
-                <TabContent>
-                    <GroupsTabComponent SubjectCourseId="_subjectCourse.Id"/>
-                </TabContent>
-                <ChildContent>
-                    <SubjectCourseGroupListComponent SubjectCourseId="_subjectCourse.Id"/>
-                </ChildContent>
-            </MudTabPanel>
-
-            <MudTabPanel>
-                <TabContent>
-                    <QueuesTabComponent/>
-                </TabContent>
-                <ChildContent>
-                    <QueueListComponent SubjectCourseId="_subjectCourse.Id"/>
-                </ChildContent>
-            </MudTabPanel>
-
-        </MudTabs>
-    }
-    else
-    {
-        <MudSkeleton
-            Width="100%"
-            Height="200px"
-            Animation="Animation.Wave"/>
-    }
 
 </MudStack>
 
-<MudSpacer/>
 
 @code {
 
+    private readonly DisplayContentController _displayController = new DisplayContentController();
+
     private ISubjectCourse? _subjectCourse;
+
+    private SubjectCourseContentTab TabEnum => Map(Tab);
 
     [Parameter]
     public Guid SubjectCourseId { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "tab")]
+    public string? Tab { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -159,6 +55,36 @@
             return;
 
         _subjectCourse = await SubjectCourseProvider.LoadAsync(SubjectCourseId, default);
+    }
+
+    private void OnSelectedTabChanged(SubjectCourseContentTab tab)
+    {
+        Tab = Map(tab);
+        NavigationManager.NavigateTo(NavigationManager.GetUriWithQueryParameter("tab", Tab));
+    }
+
+    private static string Map(SubjectCourseContentTab tab)
+    {
+        return tab switch
+        {
+            SubjectCourseContentTab.Assignments => "assignments",
+            SubjectCourseContentTab.Groups => "groups",
+            SubjectCourseContentTab.Queues => "queues",
+            SubjectCourseContentTab.Checking => "checkings",
+            _ => throw new ArgumentOutOfRangeException(nameof(tab), tab, null)
+        };
+    }
+
+    private static SubjectCourseContentTab Map(string? tab)
+    {
+        return tab switch
+        {
+            "assignments" => SubjectCourseContentTab.Assignments,
+            "groups" => SubjectCourseContentTab.Groups,
+            "queues" => SubjectCourseContentTab.Queues,
+            "checkings" => SubjectCourseContentTab.Checking,
+            _ => SubjectCourseContentTab.Assignments,
+        };
     }
 
 }

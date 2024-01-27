@@ -1,0 +1,61 @@
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.QueryParameter.Parameters
+@using System.Globalization
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.Parameters
+@namespace Itmo.Dev.Asap.Frontend.Presentation.Components
+@typeparam T where T : System.Numerics.INumber<T>
+
+<ParameterComponent
+    T="T"
+    @ref="_parameterComponent"
+    Label="@Label"
+    PreviewWidth="@PreviewWidth"
+    ToStringFunc="@(x => x.ToString() ?? string.Empty)">
+
+    <ValueInput>
+        <MudTextField
+            @ref="_field"
+            AutoFocus="true"
+            T="string"
+            Variant="Variant.Outlined"
+            Clearable="true"
+            Immediate="true"
+            OnKeyDown="@(e => OnKeyDownAsync(context.ParameterController, e))"
+            Validation="@Validator"/>
+    </ValueInput>
+
+</ParameterComponent>
+
+@code {
+
+    private static readonly Func<string, bool> Validator =
+        value => T.TryParse(value, NumberStyles.Any, null, out _);
+
+    private ParameterComponent<T>? _parameterComponent;
+    private MudTextField<string>? _field;
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public string? PreviewWidth { get; set; }
+
+    public IEnumerable<T> Values => _parameterComponent?.Values.Select(x => x.Value) ?? Enumerable.Empty<T>();
+
+    private async Task OnKeyDownAsync(IParameterController<T> controller, KeyboardEventArgs arg)
+    {
+        if (_field is not null && arg.Key.Equals("enter", StringComparison.OrdinalIgnoreCase))
+        {
+            if (Validator.Invoke(_field.Value) is false)
+                return;
+
+            T.TryParse(_field.Value, NumberStyles.Any, null, out var value);
+            value ??= default!;
+
+            controller.AddValue(new QueryValue<T>(value));
+            await controller.OnValuesChangedAsync();
+
+            await _field.Clear();
+        }
+    }
+
+}

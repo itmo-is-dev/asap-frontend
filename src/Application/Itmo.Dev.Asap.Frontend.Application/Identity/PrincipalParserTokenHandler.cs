@@ -31,7 +31,7 @@ internal class PrincipalParserTokenHandler : IEagerDependency, IDisposable
         var identity = new ClaimsIdentity(token.Claims, "jwt");
         var principal = new ClaimsPrincipal(identity);
 
-        var principalEvent = new ClaimPrincipalUpdated(principal);
+        var principalEvent = new ClaimPrincipalUpdated(principal, evt.Timestamp);
         _publisher.Publish(principalEvent);
     }
 }

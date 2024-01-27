@@ -1,7 +1,7 @@
 @namespace Itmo.Dev.Asap.Frontend.Presentation.Components
 @implements IAsyncDisposable
 
-<MudDialog DefaultFocus="DefaultFocus.Element" ContentStyle="@DialogContentStyle">
+<MudDialog DefaultFocus="DefaultFocus.Element" ContentStyle="@ContentStyle" Style="@Style">
     <DialogContent>
         @Fragment
     </DialogContent>
@@ -19,7 +19,10 @@
     public EventCallback OnClosed { get; set; }
     
     [Parameter]
-    public string? DialogContentStyle { get; set; }
+    public string? ContentStyle { get; set; }
+    
+    [Parameter]
+    public string? Style { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

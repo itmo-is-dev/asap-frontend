@@ -1,0 +1,25 @@
+::deep .first-submission {
+    flex-grow: 1;
+    padding-right: 10px;
+    text-align: right;
+}
+
+::deep .second-submission {
+    flex-grow: 1;
+    padding-left: 10px;
+    text-align: left;
+}
+
+::deep .first-submission.banned {
+    background: linear-gradient(-90deg, rgba(134, 21, 21, 0.6685267857142857) 55%, rgba(9, 9, 121, 0) 100%) no-repeat right;
+    background-size: 80% 100%;
+    color: white;
+    border-radius: 5px;
+}
+
+::deep .second-submission.banned {
+    background: linear-gradient(90deg, rgba(134, 21, 21, 0.6685267857142857) 55%, rgba(9, 9, 121, 0) 100%) no-repeat left;
+    background-size: 80% 100%;
+    color: white;
+    border-radius: 5px;
+}

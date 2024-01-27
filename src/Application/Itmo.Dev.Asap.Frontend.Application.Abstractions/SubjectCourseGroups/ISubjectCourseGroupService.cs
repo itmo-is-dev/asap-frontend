@@ -10,4 +10,9 @@ public interface ISubjectCourseGroupService
         Guid subjectCourseId,
         IEnumerable<Guid> studentGroupIds,
         CancellationToken cancellationToken);
+
+    ValueTask<IEnumerable<SubjectCourseGroupInfo>> QueryAsync(
+        Guid subjectCourseId,
+        IEnumerable<string> names,
+        CancellationToken cancellationToken);
 }

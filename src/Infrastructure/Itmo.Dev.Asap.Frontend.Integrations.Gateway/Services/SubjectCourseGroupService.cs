@@ -93,6 +93,33 @@ internal class SubjectCourseGroupService : ISubjectCourseGroupService
         return new CreateSubjectCourseGroupResult.Success();
     }
 
+    public async ValueTask<IEnumerable<SubjectCourseGroupInfo>> QueryAsync(
+        Guid subjectCourseId,
+        IEnumerable<string> names,
+        CancellationToken cancellationToken)
+    {
+        var request = new QuerySubjectCourseGroupsRequest(
+            subjectCourseId,
+            Array.Empty<Guid>(),
+            names);
+
+        IApiResponse<IEnumerable<SubjectCourseGroupDto>> response = await _subjectCourseGroupClient
+            .QueryAsync(request, cancellationToken);
+
+        if (response.IsSuccessStatusCode is false || response.Content is null)
+        {
+            ErrorDetails? details = await response.TryGetErrorDetailsAsync();
+
+            var errorEvent = new ErrorOccured(details?.Message ?? "Failed to query groups");
+            _publisher.Publish(errorEvent);
+
+            return Enumerable.Empty<SubjectCourseGroupInfo>();
+        }
+
+        return response.Content
+            .Select(group => new SubjectCourseGroupInfo(group.StudentGroupId, group.StudentGroupName));
+    }
+
     private static SubjectCourseGroupUpdated ToEvent(SubjectCourseGroupDto dto)
     {
         return new SubjectCourseGroupUpdated(dto.SubjectCourseId, dto.StudentGroupId, dto.StudentGroupName);

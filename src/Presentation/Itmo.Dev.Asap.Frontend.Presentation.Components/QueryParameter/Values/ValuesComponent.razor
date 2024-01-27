@@ -1,0 +1,68 @@
+@using Itmo.Dev.Asap.Frontend.Presentation.Components.Parameters
+@namespace Itmo.Dev.Asap.Frontend.Presentation.Components.Values
+@typeparam T
+@implements IValuesController
+
+@if (ParameterController is not null)
+{
+    <MudList Class="disable-clickable disable-ripple">
+
+        <MudListItem>
+            @ValueInput?.Invoke(this)
+        </MudListItem>
+
+        @foreach (QueryValue<T> value in ParameterController.Values)
+        {
+            <MudListItem>
+                <MudStack
+                    Row="true"
+                    Justify="Justify.SpaceBetween"
+                    AlignItems="AlignItems.Center">
+
+                    @{
+                        var str = ParameterController.ConvertValueToString(value.Value);
+                    }
+
+                    <div
+                        style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                        title="@str">
+
+                        @str
+
+                    </div>
+
+                    <div @onclick:stopPropagation="true">
+                        <MudIconButton
+                            Icon="@Icons.Material.Filled.Close"
+                            OnClick="@(() => OnValueRemoved(value))"/>
+                    </div>
+
+                </MudStack>
+            </MudListItem>
+        }
+
+    </MudList>
+}
+
+@code {
+
+    [Parameter]
+    public IParameterController<T>? ParameterController { get; set; }
+    
+    [Parameter]
+    public RenderFragment<IValuesController>? ValueInput { get; set; }
+
+    public Task OnValuesChangedAsync()
+    {
+        return ParameterController?.OnValuesChangedAsync() ?? Task.CompletedTask;
+    }
+
+    private async Task OnValueRemoved(QueryValue<T> value)
+    {
+        if (ParameterController is null)
+            return;
+
+        ParameterController.RemoveValue(value);
+        await ParameterController.OnValuesChangedAsync();
+    }
+}

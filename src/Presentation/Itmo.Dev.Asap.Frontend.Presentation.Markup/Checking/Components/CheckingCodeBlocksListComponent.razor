@@ -1,0 +1,130 @@
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking.Models
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking
+@using Itmo.Dev.Asap.Frontend.Application.Abstractions.Submissions
+@using Itmo.Dev.Asap.Frontend.Presentation.Markup.Checking.Models
+@implements IForwardPaginatorController<CheckingSimilarCodeBlocks, CodeBlocksState>
+@inject ICheckingCodeBlocksService CheckingCodeBlocksService
+@inject ISubmissionService SubmissionService
+
+@if (CheckingId is not null && Result is not null)
+{
+    <PhazorForwardPaginator Controller="@this">
+
+        <Loader>
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
+        </Loader>
+
+        <ChildContent Context="codeBlocks">
+
+            <MudStack Row="true" Justify="Justify.SpaceBetween" Class="pa-2">
+
+                <ConfirmationButtonComponent
+                    Disabled="@(Result.FirstSubmission.State is SubmissionState.Banned)"
+                    Color="Color.Error"
+                    Variant="Variant.Filled"
+                    OnSubmitted="BanFirstSubmissionAsync">
+
+                    Ban @Result.FirstSubmission.Student.DisplayName
+
+                </ConfirmationButtonComponent>
+
+                <ConfirmationButtonComponent
+                    Disabled="@(Result.SecondSubmission.State is SubmissionState.Banned)"
+                    Color="Color.Error"
+                    Variant="Variant.Filled"
+                    Reversed="true"
+                    OnSubmitted="BanSecondSubmissionAsync">
+
+                    Ban @Result.SecondSubmission.Student.DisplayName
+
+                </ConfirmationButtonComponent>
+
+            </MudStack>
+
+            <MudExpansionPanels MultiExpansion="true" Elevation="3" Style="margin: 8px">
+                @foreach (var codeBlock in codeBlocks)
+                {
+                    <CheckingSimilarCodeBlocksComponent CodeBlocks="codeBlock"/>
+                }
+            </MudExpansionPanels>
+        </ChildContent>
+
+    </PhazorForwardPaginator>
+}
+
+@code {
+
+    [Parameter]
+    public long? CheckingId { get; set; }
+
+    [Parameter]
+    public SubjectCourseCheckingResult? Result { get; set; }
+
+    public CodeBlocksState CreateState()
+        => new CodeBlocksState(0, true);
+
+    public bool ShouldLoadNextPage(CodeBlocksState state)
+        => state.HasNext;
+
+    public async Task<ForwardPageLoadResult<CheckingSimilarCodeBlocks, CodeBlocksState>> LoadPageAsync(
+        CodeBlocksState state,
+        CancellationToken cancellationToken)
+    {
+        if (CheckingId is null || Result is null)
+        {
+            return new ForwardPageLoadResult<CheckingSimilarCodeBlocks, CodeBlocksState>(
+                Enumerable.Empty<CheckingSimilarCodeBlocks>(),
+                new CodeBlocksState(0, false));
+        }
+
+        var response = await CheckingCodeBlocksService.GetCheckingCodeBlocksAsync(
+            CheckingId.Value,
+            Result.FirstSubmission.SubmissionId,
+            Result.SecondSubmission.SubmissionId,
+            state.Cursor,
+            cancellationToken);
+
+        return new ForwardPageLoadResult<CheckingSimilarCodeBlocks, CodeBlocksState>(
+            response.CodeBlocks,
+            new CodeBlocksState(state.Cursor + response.Count, response.HasNext));
+    }
+
+    private async Task BanFirstSubmissionAsync()
+    {
+        if (Result is null)
+            return;
+
+        var success = await SubmissionService.BanAsync(
+            Result.FirstSubmission.Student.Id,
+            Result.AssignmentId,
+            default);
+
+        if (success is false)
+            return;
+
+        Result = Result with
+        {
+            FirstSubmission = Result.FirstSubmission with { State = SubmissionState.Banned },
+        };
+    }
+
+    private async Task BanSecondSubmissionAsync()
+    {
+        if (Result is null)
+            return;
+
+        var success = await SubmissionService.BanAsync(
+            Result.SecondSubmission.Student.Id,
+            Result.AssignmentId,
+            default);
+
+        if (success is false)
+            return;
+
+        Result = Result with
+        {
+            SecondSubmission = Result.SecondSubmission with { State = SubmissionState.Banned },
+        };
+    }
+
+}

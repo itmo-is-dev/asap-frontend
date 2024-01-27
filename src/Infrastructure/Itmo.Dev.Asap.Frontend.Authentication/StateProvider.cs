@@ -12,6 +12,7 @@ internal class StateProvider : AuthenticationStateProvider, IEagerDependency, ID
 {
     private readonly IDisposable _subscription;
     private ClaimsPrincipal? _principal;
+    private DateTimeOffset _lastUpdate = DateTimeOffset.MinValue;
 
     public StateProvider(IEventProvider provider)
     {
@@ -24,7 +25,7 @@ internal class StateProvider : AuthenticationStateProvider, IEagerDependency, ID
 
         provider
             .Observe<AuthorizationExpired>()
-            .Subscribe(_ => OnAuthenticationExpired())
+            .Subscribe(OnAuthenticationExpired)
             .CombineTo(ref _subscription);
     }
 
@@ -41,13 +42,23 @@ internal class StateProvider : AuthenticationStateProvider, IEagerDependency, ID
 
     private void OnPrincipalUpdated(ClaimPrincipalUpdated evt)
     {
+        if (evt.Timestamp <= _lastUpdate)
+            return;
+
         _principal = evt.Principal;
+        _lastUpdate = evt.Timestamp;
+
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
-    private void OnAuthenticationExpired()
+    private void OnAuthenticationExpired(AuthorizationExpired evt)
     {
+        if (evt.Timestamp <= _lastUpdate)
+            return;
+
         _principal = null;
+        _lastUpdate = evt.Timestamp;
+
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 }

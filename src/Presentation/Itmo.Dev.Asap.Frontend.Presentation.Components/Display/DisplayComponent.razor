@@ -1,0 +1,24 @@
+<MudPaper
+    Elevation="2"
+    Style="overflow-y: scroll; flex-basis: 60%">
+
+    @if (Provider is not null)
+    {
+        <div class="pa-3">
+            <PhazorReactiveNullableValue Value="Provider.Content">
+                @(context ?? NoContent)
+            </PhazorReactiveNullableValue>
+        </div>
+    }
+
+</MudPaper>
+
+@code {
+
+    [Parameter]
+    public IDisplayContentProvider? Provider { get; set; }
+
+    [Parameter]
+    public RenderFragment? NoContent { get; set; }
+
+}

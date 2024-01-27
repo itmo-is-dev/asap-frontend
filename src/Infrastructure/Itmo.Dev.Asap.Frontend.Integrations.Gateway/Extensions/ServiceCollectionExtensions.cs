@@ -1,4 +1,5 @@
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Assignments;
+using Itmo.Dev.Asap.Frontend.Application.Abstractions.Checking;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Github;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.GroupAssignments;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Identity;
@@ -8,6 +9,7 @@ using Itmo.Dev.Asap.Frontend.Application.Abstractions.Students;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourseGroups;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.SubjectCourses;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Subjects;
+using Itmo.Dev.Asap.Frontend.Application.Abstractions.Submissions;
 using Itmo.Dev.Asap.Frontend.Application.Abstractions.Users;
 using Itmo.Dev.Asap.Frontend.Integrations.Gateway.Services;
 using Itmo.Dev.Asap.Frontend.Integrations.Gateway.Tools;
@@ -36,6 +38,12 @@ public static class ServiceCollectionExtensions
 
         collection.AddSingleton<IIdentityService, IdentityService>();
         collection.AddSingleton<IGithubService, GithubService>();
+
+        collection.AddSingleton<ICheckingService, CheckingService>();
+        collection.AddSingleton<ICheckingResultService, CheckingResultService>();
+        collection.AddSingleton<ICheckingCodeBlocksService, CheckingCodeBlocksService>();
+
+        collection.AddSingleton<ISubmissionService, SubmissionService>();
 
         return collection;
     }

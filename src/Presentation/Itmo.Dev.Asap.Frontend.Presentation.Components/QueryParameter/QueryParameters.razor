@@ -1,0 +1,46 @@
+@namespace Itmo.Dev.Asap.Frontend.Presentation.Components
+
+<MudCard Class="pa-3 mb-3">
+    <MudStack Row="true" Justify="Justify.SpaceBetween">
+
+        <MudStack
+            Row="true"
+            AlignItems="AlignItems.Center"
+            Justify="JustifyParameters"
+            Style="flex-grow: 1">
+
+            @Parameters
+
+
+            @if (EndContent is not null)
+            {
+                <MudDivider Vertical="true"/>
+            }
+
+        </MudStack>
+
+        @if (ParametersSpacerGrow is not null)
+        {
+            <div style="@($"flex-grow: {ParametersSpacerGrow}")"></div>
+        }
+
+        @EndContent
+
+    </MudStack>
+</MudCard>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? Parameters { get; set; }
+
+    [Parameter]
+    public RenderFragment? EndContent { get; set; }
+
+    [Parameter]
+    public Justify JustifyParameters { get; set; } = Justify.FlexStart;
+    
+    [Parameter]
+    public int? ParametersSpacerGrow { get; set; }
+
+}

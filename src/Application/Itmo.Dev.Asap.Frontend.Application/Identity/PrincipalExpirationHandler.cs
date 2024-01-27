@@ -7,6 +7,7 @@ using System.Security.Claims;
 
 namespace Itmo.Dev.Asap.Frontend.Application.Identity;
 
+[EagerDependencyPriority(int.MaxValue)]
 internal class PrincipalExpirationHandler : IEagerDependency, IDisposable
 {
     private readonly IEventPublisher _publisher;
@@ -67,7 +68,7 @@ internal class PrincipalExpirationHandler : IEagerDependency, IDisposable
                 return;
         }
 
-        var expiredEvent = new AuthorizationExpired();
+        var expiredEvent = new AuthorizationExpired(evt.Timestamp);
         _publisher.Publish(expiredEvent);
     }
 }

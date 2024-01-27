@@ -49,7 +49,7 @@ internal class LocalStorageTokenHandler : IDisposable
         if (token is null)
             return;
 
-        var evt = new TokenUpdated(token);
+        var evt = new TokenUpdated(token, DateTimeOffset.UtcNow);
         _eventCache.Add(evt);
 
         _publisher.Publish(evt);

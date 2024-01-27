@@ -1,17 +1,16 @@
-@attribute [AllowAnonymous]
 @inject NavigationManager NavigationManager
 
 @code {
 
     [Parameter]
-    public string? Uri { get; set; }
+    public string? Url { get; set; }
 
     protected override void OnParametersSet()
     {
-        if (Uri is null)
+        if (Url is null)
             return;
 
-        NavigationManager.NavigateTo(Uri);
+        NavigationManager.NavigateTo(Url);
     }
 
 }
