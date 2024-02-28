@@ -24,8 +24,8 @@ public static class CheckingMapper
     public static CheckingSimilarCodeBlocks MapToModel(this SimilarCodeBlocksDto codeBlocks)
     {
         return new CheckingSimilarCodeBlocks(
-            codeBlocks.First.MapToModel(),
-            codeBlocks.Second.MapToModel(),
+            codeBlocks.First.Select(MapToModel).ToArray(),
+            codeBlocks.Second.Select(MapToModel).ToArray(),
             codeBlocks.SimilarityScore);
     }
 

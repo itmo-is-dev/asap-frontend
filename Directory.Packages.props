@@ -16,7 +16,7 @@
     <PackageVersion Include="Grpc.Core.Api" Version="2.55.0" />
     <PackageVersion Include="Grpc.Net.Client" Version="2.55.0" />
     <PackageVersion Include="Grpc.Tools" Version="2.56.2" />
-    <PackageVersion Include="Itmo.Dev.Asap.Gateway.Sdk" Version="1.0.60" />
+    <PackageVersion Include="Itmo.Dev.Asap.Gateway.Sdk" Version="1.0.62" />
     <PackageVersion Include="Itmo.Dev.Platform.Kafka" Version="1.0.38" />
     <PackageVersion Include="Itmo.Dev.Platform.Postgres" Version="1.0.38" />
     <PackageVersion Include="Itmo.Dev.Platform.Testing" Version="1.0.38" />

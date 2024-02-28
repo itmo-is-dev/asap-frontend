@@ -11,16 +11,6 @@
                     @(CodeBlocks.SimilarityScore * 100)%
                 </MudText>
 
-                <MudText>
-                    @ToDisplayString(CodeBlocks.First)
-                </MudText>
-
-                |
-
-                <MudText>
-                    @ToDisplayString(CodeBlocks.Second)
-                </MudText>
-
             </MudStack>
         </TitleContent>
 
@@ -28,13 +18,17 @@
             <MudStack Row="true" Justify="Justify.SpaceBetween">
 
                 <MudStack Style="width: 50%">
-                    <MudText Typo="Typo.caption">@CodeBlocks.First.FilePath</MudText>
-                    <MudMarkdown Value="@ToMarkdownCode(CodeBlocks.First)"></MudMarkdown>
+                    @foreach (var codeBlock in CodeBlocks.First)
+                    {
+                        <CodeBlockComponent CodeBlock="codeBlock"/>
+                    }
                 </MudStack>
 
                 <MudStack Style="width: 50%">
-                    <MudText Typo="Typo.caption">@CodeBlocks.Second.FilePath</MudText>
-                    <MudMarkdown Value="@ToMarkdownCode(CodeBlocks.Second)"></MudMarkdown>
+                    @foreach (var codeBlock in CodeBlocks.Second)
+                    {
+                        <CodeBlockComponent CodeBlock="codeBlock"/>
+                    }
                 </MudStack>
 
             </MudStack>
@@ -50,8 +44,5 @@
 
     private static string ToDisplayString(CheckingCodeBlock codeBlock)
         => $"{codeBlock.FilePath} ({codeBlock.LineFrom}:{codeBlock.LineTo})";
-
-    private static string ToMarkdownCode(CheckingCodeBlock codeBlock)
-        => $"```{Path.GetExtension(codeBlock.FilePath)}\n{codeBlock.Content}\n```";
 
 }
