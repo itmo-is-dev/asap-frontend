@@ -13,7 +13,7 @@
 
                 @if (_isExpanded is false)
                 {
-                    <MudStack>
+                    <MudStack Style="flex-basis: 50%">
                         @foreach (var block in CodeBlocks.First)
                         {
                             <MudText Typo="Typo.caption">
@@ -22,7 +22,7 @@
                         }
                     </MudStack>
 
-                    <MudStack>
+                    <MudStack Style="flex-basis: 50%">
                         @foreach (var block in CodeBlocks.Second)
                         {
                             <MudText Typo="Typo.caption">
