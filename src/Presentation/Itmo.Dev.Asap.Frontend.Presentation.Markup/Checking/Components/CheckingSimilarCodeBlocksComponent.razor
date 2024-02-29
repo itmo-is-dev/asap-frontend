@@ -2,7 +2,7 @@
 
 @if (CodeBlocks is not null)
 {
-    <MudExpansionPanel>
+    <MudExpansionPanel @bind-IsExpanded="_isExpanded">
 
         <TitleContent>
             <MudStack Row="true" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
@@ -10,6 +10,27 @@
                 <MudText Typo="Typo.h4">
                     @(CodeBlocks.SimilarityScore * 100)%
                 </MudText>
+
+                @if (_isExpanded is false)
+                {
+                    <MudStack>
+                        @foreach (var block in CodeBlocks.First)
+                        {
+                            <MudText Typo="Typo.caption">
+                                @block.FilePath
+                            </MudText>
+                        }
+                    </MudStack>
+
+                    <MudStack>
+                        @foreach (var block in CodeBlocks.Second)
+                        {
+                            <MudText Typo="Typo.caption">
+                                @block.FilePath
+                            </MudText>
+                        }
+                    </MudStack>
+                }
 
             </MudStack>
         </TitleContent>
@@ -38,6 +59,8 @@
 }
 
 @code {
+
+    private bool _isExpanded;
 
     [Parameter]
     public CheckingSimilarCodeBlocks? CodeBlocks { get; set; }
