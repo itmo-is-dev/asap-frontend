@@ -28,7 +28,7 @@ internal class CheckingResultService : ICheckingResultService
         PageToken pageToken,
         CancellationToken cancellationToken)
     {
-        var request = new GetCheckingResultsRequest(checkingId, assignmentIds, groupIds, 50, pageToken.Value);
+        var request = new GetCheckingResultsRequest(checkingId, assignmentIds, groupIds, 20, pageToken.Value);
 
         IApiResponse<GetCheckingResultsResponse> response = await _client
             .GetCheckingResultsAsync(request, cancellationToken);
